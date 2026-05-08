@@ -20,10 +20,8 @@ fetch('/api/title').then(r => r.json()).then(d => {
   document.title = d.title;
 });
 
-const cookiePseudo = document.cookie.split('; ').find(r => r.startsWith('pseudo='));
-if (cookiePseudo) {
-  try { document.getElementById('pseudo').value = decodeURIComponent(cookiePseudo.split('=')[1]); } catch {}
-}
+const savedPseudo = localStorage.getItem('pseudo');
+if (savedPseudo) document.getElementById('pseudo').value = savedPseudo;
 
 document.getElementById('join-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -35,6 +33,8 @@ document.getElementById('join-form').addEventListener('submit', async (e) => {
     body: JSON.stringify({ pseudo })
   });
   if (r.ok) {
+    const data = await r.json();
+    localStorage.setItem('pseudo', data.pseudo);
     location.href = '/play.html';
   } else {
     const err = document.getElementById('error');

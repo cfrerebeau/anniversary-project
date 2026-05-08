@@ -4,8 +4,7 @@ function getCookie(name) {
 }
 
 const playerId = getCookie('playerId');
-const pseudoRaw = getCookie('pseudo');
-const pseudo = pseudoRaw ? decodeURIComponent(pseudoRaw) : null;
+const pseudo = localStorage.getItem('pseudo');
 
 if (!playerId || !pseudo) {
   location.href = '/';

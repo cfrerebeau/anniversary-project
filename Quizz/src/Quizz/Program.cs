@@ -43,7 +43,6 @@ app.MapPost("/api/join", (HttpContext ctx, JoinRequest req) =>
         Expires = DateTimeOffset.UtcNow.AddDays(7)
     };
     ctx.Response.Cookies.Append("playerId", playerId, opts);
-    ctx.Response.Cookies.Append("pseudo", Uri.EscapeDataString(pseudo), opts);
     return Results.Ok(new { playerId, pseudo });
 });
 
