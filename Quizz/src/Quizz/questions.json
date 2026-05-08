@@ -1,0 +1,27 @@
+{
+  "title": "20 ans de Mariage ;-)",
+  "defaultTimeLimit": 20,
+  "questions": [
+    {
+      "text": "Quelle est la capitale de la France ?",
+      "options": ["Paris", "Lyon", "Marseille", "Bordeaux"],
+      "correctIndex": 0
+    },
+    {
+      "text": "Combien y a-t-il de continents sur Terre ?",
+      "options": ["5", "6", "7"],
+      "correctIndex": 2
+    },
+    {
+      "text": "Le soleil est-il une étoile ?",
+      "options": ["Oui", "Non"],
+      "correctIndex": 0,
+      "timeLimit": 10
+    },
+    {
+      "text": "Quel langage est utilisé pour ce projet ?",
+      "options": ["Java", "C#", "Python", "Go"],
+      "correctIndex": 1
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>20 ans de Mariage ;-)</title>
+<link rel="stylesheet" href="/css/site.css" />
+</head>
+<body class="join-page">
+<main>
+  <img class="hero" src="/img/main.png" alt="20 ans de Mariage" />
+  <form id="join-form">
+    <input id="pseudo" maxlength="20" placeholder="Ton pseudo" autofocus required />
+    <button type="submit">Rejoindre le quiz</button>
+  </form>
+  <p id="error" class="error hidden"></p>
+</main>
+<script>
+fetch('/api/title').then(r => r.json()).then(d => {
+  document.title = d.title;
+});
+
+const cookiePseudo = document.cookie.split('; ').find(r => r.startsWith('pseudo='));
+if (cookiePseudo) {
+  try { document.getElementById('pseudo').value = decodeURIComponent(cookiePseudo.split('=')[1]); } catch {}
+}
+
+document.getElementById('join-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const pseudo = document.getElementById('pseudo').value.trim();
+  if (!pseudo) return;
+  const r = await fetch('/api/join', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pseudo })
+  });
+  if (r.ok) {
+    location.href = '/play.html';
+  } else {
+    const err = document.getElementById('error');
+    err.textContent = 'Erreur, réessaye';
+    err.classList.remove('hidden');
+  }
+});
+</script>
+</body>
+</html>

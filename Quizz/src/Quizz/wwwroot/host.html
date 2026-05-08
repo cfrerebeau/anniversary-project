@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>20 ans de Mariage ;-)</title>
+<link rel="stylesheet" href="/css/site.css" />
+<script src="/lib/signalr/signalr.min.js"></script>
+</head>
+<body class="host-page">
+<header>
+  <h1>Host</h1>
+  <span id="state-indicator" class="state">Lobby</span>
+</header>
+<main>
+  <section>
+    <h2>Joueurs (<span id="player-count">0</span>)</h2>
+    <ul id="players"></ul>
+  </section>
+
+  <section id="question-section" class="hidden">
+    <div id="question-info"></div>
+    <div id="answer-progress"></div>
+  </section>
+
+  <section id="controls">
+    <button id="btn-next" class="primary">Démarrer</button>
+    <button id="btn-reveal" disabled>Révéler la réponse</button>
+    <button id="btn-leaderboard" disabled>Afficher le classement</button>
+    <button id="btn-reset" class="danger">Réinitialiser</button>
+  </section>
+</main>
+<script src="/js/host.js"></script>
+</body>
+</html>
