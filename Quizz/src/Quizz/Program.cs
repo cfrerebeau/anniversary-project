@@ -4,11 +4,7 @@ using System.Text.Json;
 using Quizz;
 using QRCoder;
 
-var builder = WebApplication.CreateBuilder(new WebApplicationOptions
-{
-    Args = args,
-    ContentRootPath = AppContext.BaseDirectory
-});
+var builder = WebApplication.CreateBuilder(args);
 
 var questionsPath = Path.Combine(builder.Environment.ContentRootPath, "questions.json");
 if (!File.Exists(questionsPath))
@@ -22,6 +18,8 @@ var config = JsonSerializer.Deserialize<QuizConfig>(json, new JsonSerializerOpti
 
 builder.Services.AddSingleton(new GameService(config));
 builder.Services.AddSignalR();
+
+builder.WebHost.UseUrls("http://0.0.0.0:5000");
 
 var app = builder.Build();
 

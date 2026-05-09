@@ -20,7 +20,7 @@ export function TotalCard({
       <div className="text-[13px] text-ink-soft mt-[6px]">
         {contributorsCount > 0
           ? `${contributorsCount} ${contributorsCount > 1 ? 'personnes ont' : 'personne a'} déjà mis quelque chose. Pas de classement, promis.`
-          : "Personne n'a encore mis. C'est l'occasion d'ouvrir le bal!"}
+          : "Personne n'a encore mis. T'as l'occasion d'ouvrir le bal."}
       </div>
       <div
         className="mt-[14px] h-[4px] rounded-[2px] overflow-hidden"

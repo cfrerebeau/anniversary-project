@@ -12,27 +12,13 @@ export const cagnotteMessageSchema = z.object({
   message: z.string().trim().max(1000).optional().default(''),
 })
 
-export const quizQuestionSchema = z
-  .object({
-    question: z
-      .string()
-      .trim()
-      .min(8, 'La question est un peu courte.')
-      .max(280, 'Trop long pour un quiz.'),
-    options: z
-      .array(z.string().trim().min(1, 'Réponse vide.').max(120))
-      .min(2, 'Il faut au moins deux options.')
-      .max(4, 'Pas plus de quatre.'),
-    correct_index: z.coerce.number().int().min(0),
-  })
-  .refine((d) => d.correct_index < d.options.length, {
-    message: 'La bonne réponse pointe en dehors des options.',
-    path: ['correct_index'],
-  })
-  .refine((d) => new Set(d.options.map((o) => o.toLowerCase())).size === d.options.length, {
-    message: 'Deux options identiques.',
-    path: ['options'],
-  })
+export const anecdoteSchema = z.object({
+  title: z.string().trim().max(120).optional().default(''),
+  story: z.string().trim().min(20, 'Encore quelques mots…').max(4000),
+  since: z
+    .enum(['<1 an', '1-5 ans', '5-15 ans', 'la vie'])
+    .optional(),
+})
 
 export const photoSignSchema = z.object({
   filename: z.string().min(1).max(200),

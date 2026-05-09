@@ -9,7 +9,7 @@ const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
 /**
  * Client SSR pour les composants serveur — lit/écrit le cookie session.
  * Utilise la clé anon : OK pour la session utilisateur (auth.users).
- * Pour les écritures privilégiées (insert dans quizz, etc.), utiliser
+ * Pour les écritures privilégiées (insert dans anecdotes, etc.), utiliser
  * `getServiceClient()` ci-dessous.
  */
 export async function getServerClient() {

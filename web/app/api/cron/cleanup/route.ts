@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Post-mariage cleanup : on supprime contenus > J+180.
-  let purgedQuizz = 0
+  let purgedAnecdotes = 0
   let purgedPhotos = 0
   let purgedMessages = 0
   const weddingISO = process.env.NEXT_PUBLIC_WEDDING_DATE
@@ -38,11 +38,11 @@ export async function GET(request: NextRequest) {
     if (Date.now() > cutoff) {
       const cutoffISO = new Date(cutoff).toISOString()
       const [a, p, m] = await Promise.all([
-        service.from('quizz').delete().lt('created_at', cutoffISO).select('id'),
+        service.from('anecdotes').delete().lt('created_at', cutoffISO).select('id'),
         service.from('photos').delete().lt('created_at', cutoffISO).select('id'),
         service.from('cagnotte_messages').delete().lt('created_at', cutoffISO).select('id'),
       ])
-      purgedQuizz = a.data?.length ?? 0
+      purgedAnecdotes = a.data?.length ?? 0
       purgedPhotos = p.data?.length ?? 0
       purgedMessages = m.data?.length ?? 0
     }
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     ok: true,
     rate_events_purged: rateRows?.length ?? 0,
-    purged_quizz: purgedQuizz,
+    purged_anecdotes: purgedAnecdotes,
     purged_photos: purgedPhotos,
     purged_messages: purgedMessages,
   })
