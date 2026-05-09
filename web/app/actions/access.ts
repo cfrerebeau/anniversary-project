@@ -79,7 +79,16 @@ export async function requestAccessLink(formData: FormData): Promise<{
           email,
           options: { redirectTo: `${baseUrl}/auth/callback` },
         })
-        if (error || !data?.properties?.action_link) return
+        if (error || !data?.properties?.hashed_token) return
+        // On contourne le `action_link` (legacy implicit flow → fragment
+        // `#access_token=...` que le serveur ne voit pas). On construit un
+        // lien direct vers notre route, qui vérifie le token via verifyOtp
+        // côté serveur et pose le cookie de session.
+        const params = new URLSearchParams({
+          token_hash: data.properties.hashed_token,
+          type: 'magiclink',
+        })
+        const link = `${baseUrl}/auth/callback?${params.toString()}`
         await sendEmail({
           to: email,
           subject: "Ton lien d'accès",
@@ -88,7 +97,7 @@ export async function requestAccessLink(formData: FormData): Promise<{
             '',
             "Voici ton lien d'accès. Un seul clic, pas de mot de passe :",
             '',
-            data.properties.action_link,
+            link,
             '',
             'Le lien expire dans une heure. Si besoin, reviens redemander un lien.',
           ].join('\n'),
