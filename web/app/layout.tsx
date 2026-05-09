@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Public_Sans, Instrument_Serif, JetBrains_Mono } from 'next/font/google'
+import { Public_Sans, Fraunces, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 
 const publicSans = Public_Sans({
@@ -9,10 +9,11 @@ const publicSans = Public_Sans({
   style: ['normal', 'italic'],
 })
 
-const instrumentSerif = Instrument_Serif({
-  variable: '--font-instrument-serif',
+const fraunces = Fraunces({
+  variable: '--font-fraunces',
   subsets: ['latin'],
-  weight: ['400'],
+  axes: ['SOFT', 'opsz'],
+  weight: ['400', '500', '600', '700'],
   style: ['normal', 'italic'],
 })
 
@@ -43,7 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="fr"
-      className={`${publicSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${publicSans.variable} ${fraunces.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="ba-paper min-h-full text-ink">{children}</body>
     </html>

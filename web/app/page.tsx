@@ -136,8 +136,8 @@ export default async function HomePage() {
       <div className="px-[22px] pt-[14px] pb-[8px] flex flex-col gap-[12px]">
         <SecondaryCard
           href="/photos"
-          tagColor="bg-olive"
-          abbr="ph."
+          iconSrc="/old-photo.png"
+          iconAlt="Vieilles photos"
           title="Tes vieilles photos d'eux."
           body="Voyages, soirées, mariages d'amis. Promis on garde tout pour nous."
           meta={photoCount > 0 ? `${photoCount} ${photoCount > 1 ? 'photos partagées' : 'photo partagée'}` : null}
