@@ -91,7 +91,7 @@ export function AccessForm() {
       )}
       <div className="mt-[18px]">
         <BAPrimary type="submit" full disabled={pending}>
-          {pending ? 'Une seconde…' : 'Renvoyer mon lien'}
+          {pending ? 'Une seconde…' : 'Entre ton email'}
         </BAPrimary>
       </div>
     </form>

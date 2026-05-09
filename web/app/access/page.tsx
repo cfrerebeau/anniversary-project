@@ -27,8 +27,8 @@ export default function AccessPage() {
             className="text-ink-soft text-[16px] leading-[1.5] m-0"
             style={{ textWrap: 'pretty' }}
           >
-            Si tu as reçu un email avec un lien, c&apos;est par là qu&apos;on entre. Sinon, laisse
-            ton adresse — on vérifie et on te le renvoie.
+            Entre ton email — on vérifie qu&apos;il est dans la liste et on t&apos;envoie un lien
+            pour se connecter.
           </p>
 
           <AccessForm />

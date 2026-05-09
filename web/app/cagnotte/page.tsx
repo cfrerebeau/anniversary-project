@@ -40,7 +40,7 @@ export default async function CagnottePage() {
           eyebrow="01 · cagnotte"
           title="Mettre au pot."
           italicWord="pot"
-          sub={`Brice & Alix partent deux semaines à la Toussaint — Grèce ou côte amalfitaine, en famille Marcillac. Cette cagnotte, c'est notre coup de pouce. Compte Wise dédié${recipient ? `, ouvert au nom de ${recipient}` : ''}, total tenu à jour ici. Vire ce que tu veux, sans pression.`}
+          sub={`Brice & Alix partent deux semaines à la Toussaint — Grèce ou côte amalfitaine, en famille Marcillac. Cette cagnotte, c'est notre coup de pouce. Compte Wise dédié${recipient ? `, ouvert au nom de ${recipient}` : ''}, total tenu à jour ici. Pas de pression sur le montant.`}
         />
 
         {/* Mobile = pile, Desktop = 2 colonnes (coordonnées à gauche / formulaire à droite) */}
