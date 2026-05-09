@@ -1,0 +1,36 @@
+# OS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+
+# Secrets & artefacts (les keys ont été migrées hors du repo)
+*.pem
+.env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel
+
+# Supabase CLI ephemeral state (regenerated on `supabase link`)
+**/supabase/.temp
+**/supabase/.branches
+
+# Prompts / scratch — ne jamais commit (contient PDFs et photos sources)
+.prompt
+**/.prompt
+
+# Claude memory / plans (project-local, hors du repo)
+.claude/projects
+.claude/plans
+
+# Build outputs (Next.js, etc.)
+**/node_modules
+**/.next
+**/out
+**/build
+**/coverage
+*.tsbuildinfo
+next-env.d.ts
