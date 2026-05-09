@@ -12,8 +12,24 @@ Quiz multi-joueurs façon Kahoot, **100 % local** : un serveur ASP.NET Core sur 
 
 ## Prérequis
 
-- .NET SDK 10.0 ou plus
-- Connexion internet uniquement au **premier build** (téléchargement de `signalr.min.js`). Ensuite tout marche offline.
+Deux options selon que tu compiles toi-même ou que tu télécharges un binaire prêt à l'emploi :
+
+- **Depuis les sources** : .NET SDK 10.0+ et une connexion internet pour le premier build (téléchargement de `signalr.min.js`).
+- **Binaire pré-compilé** : aucun runtime nécessaire. Télécharge la release pour ta plateforme dans [GitHub Releases](../../releases) — l'archive contient l'exécutable, `wwwroot/` et `questions.json`.
+
+## Lancer un binaire de release
+
+```bash
+# Linux / macOS
+tar xzf Quizz-vX.Y.Z-linux-x64.tar.gz
+./Quizz --urls=http://0.0.0.0:5000
+
+# Windows (PowerShell)
+Expand-Archive Quizz-vX.Y.Z-win-x64.zip
+.\Quizz\Quizz.exe --urls=http://0.0.0.0:5000
+```
+
+> ⚠️ **`--urls=http://0.0.0.0:5000` est nécessaire** pour exposer le serveur sur toutes les interfaces réseau (sinon ASP.NET ne bind que sur `localhost` et les téléphones ne peuvent pas se connecter). Tu peux changer le port en remplaçant `5000` par autre chose dans la commande.
 
 ## Structure
 
@@ -30,11 +46,13 @@ Quizz/
 └── test/Quizz.Tests/          # 22 tests xUnit sur GameService
 ```
 
-## Lancer le serveur
+## Lancer le serveur depuis les sources
 
 ```bash
-dotnet run --project src/Quizz
+dotnet run --project src/Quizz -- --urls=http://0.0.0.0:5000
 ```
+
+> Le `--` sépare les arguments `dotnet run` des arguments passés à l'application elle-même.
 
 Au démarrage, le serveur affiche les URLs accessibles depuis le LAN :
 
@@ -119,5 +137,16 @@ gain = 1000 × (1 − 0.5 × (temps_réponse / time_limit))
 ```bash
 dotnet build              # build solution complète
 dotnet test               # lance les 22 tests
-dotnet run --project src/Quizz
+dotnet run --project src/Quizz -- --urls=http://0.0.0.0:5000
 ```
+
+## Releases
+
+À chaque tag `v*` poussé sur le repo, GitHub Actions ([.github/workflows/release.yml](../.github/workflows/release.yml)) compile des binaires self-contained pour Linux x64, Windows x64, macOS x64 et macOS arm64, puis les attache automatiquement à une GitHub Release.
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+Les artefacts sont des archives contenant l'exécutable + `wwwroot/` + `questions.json`. Aucun runtime .NET n'est requis sur la machine cible.
