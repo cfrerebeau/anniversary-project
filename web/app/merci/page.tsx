@@ -33,7 +33,7 @@ const VARIANTS: Record<'cagnotte' | 'photos' | 'anecdotes', Variant> = {
     eyebrow: 'le carnet est plus épais',
     stampLabel: 'Reçu.',
     stampColor: 'olive',
-    h1: 'Trois photos de plus dans la boîte.',
+    h1: 'Tes photos sont dans la boîte.',
     italic: 'boîte',
     body: "On a hâte de tout regarder ensemble. Continue à fouiller dans tes vieux dossiers — y'a souvent des pépites en bas du téléphone.",
     sign: 'M., L., T. & les autres',

@@ -1,7 +1,8 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { requireGuest, getFirstName } from '@/lib/auth'
 import { getServiceClient } from '@/lib/supabase/server'
-import { getWiseBalance } from '@/lib/wise'
+import { getCagnotteTotalCents } from '@/lib/cagnotte'
 import { BAHeader } from '@/components/design/header'
 import { BAPageTitle } from '@/components/design/page-title'
 import { PageContainer } from '@/components/design/page-container'
@@ -17,18 +18,13 @@ export default async function CagnottePage() {
   const firstName = getFirstName(guest)
 
   const service = getServiceClient()
-  // Live query Wise on each render — toujours frais. Fallback sur le cache
-  // (rafraîchi par le cron quotidien) si Wise est indisponible, pour ne
-  // jamais montrer 0 € sur une coupure transitoire.
-  const [balance, { data: cache }, { count }] = await Promise.all([
-    getWiseBalance(),
-    service.from('cagnotte_balance_cache').select('amount_cents').eq('id', 1).single(),
+  const [total, { count }] = await Promise.all([
+    getCagnotteTotalCents(),
     service
       .from('cagnotte_messages')
       .select('id', { count: 'exact', head: true }),
   ])
 
-  const total = balance?.amount_cents ?? cache?.amount_cents ?? 0
   const contributors = count ?? 0
 
   const iban = process.env.CAGNOTTE_IBAN ?? ''
@@ -36,6 +32,7 @@ export default async function CagnottePage() {
   const reference = process.env.CAGNOTTE_REFERENCE ?? 'CADEAU-BA'
   const recipient = process.env.CAGNOTTE_RECIPIENT_NAME ?? ''
   const lydiaUrl = process.env.CAGNOTTE_LYDIA_URL ?? ''
+  const whatsappUrl = process.env.NEXT_PUBLIC_WHATSAPP_URL ?? ''
 
   return (
     <PageContainer width="wide">
@@ -79,6 +76,38 @@ export default async function CagnottePage() {
                     <div className="text-[15px] font-medium">Plutôt Lydia ?</div>
                     <div className="text-[12px] text-ink-soft">
                       {stripProtocol(lydiaUrl)} — secondaire
+                    </div>
+                  </div>
+                  <IconArrow size={16} className="text-ink-mute" />
+                </a>
+              </div>
+            )}
+
+            {whatsappUrl && (
+              <div className="px-[22px] pt-[14px]">
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="ba-btn w-full bg-transparent border border-paper-edge rounded-[14px] py-[14px] px-[16px] flex items-center gap-[12px] text-ink"
+                >
+                  <div
+                    className="shrink-0 relative"
+                    style={{ width: 32, height: 32 }}
+                    aria-hidden
+                  >
+                    <Image
+                      src="/whatsapp.png"
+                      alt=""
+                      fill
+                      sizes="32px"
+                      style={{ objectFit: 'contain' }}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-[15px] font-medium">Discuter des idées cadeau</div>
+                    <div className="text-[12px] text-ink-soft">
+                      Groupe WhatsApp — entre complices
                     </div>
                   </div>
                   <IconArrow size={16} className="text-ink-mute" />

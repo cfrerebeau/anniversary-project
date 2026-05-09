@@ -256,12 +256,16 @@ export function PhotosUploader() {
                     </>
                   ) : it.state === 'done' ? (
                     <>
+                      <div className="text-[11px] text-ink-mute mb-[2px] leading-[1.3]">
+                        Ajoute un commentaire — <em className="italic">quand</em>,{' '}
+                        <em className="italic">où</em>, qui ?
+                      </div>
                       <input
                         type="text"
                         value={it.caption}
                         onChange={(e) => setCaption(it.id, e.target.value)}
                         onBlur={() => void commitCaption(it)}
-                        placeholder="Quand ? Où ?"
+                        placeholder="ex. été 2019, à Lisbonne"
                         className="w-full bg-transparent outline-none text-[14px] text-ink py-[4px]"
                         style={{ borderBottom: '1px dashed var(--color-paper-edge)' }}
                       />

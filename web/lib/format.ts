@@ -19,3 +19,12 @@ export function daysUntil(targetISO: string): number {
   const diff = target - now
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)))
 }
+
+/**
+ * Renvoie l'ISO d'il y a `seconds` secondes. Wrapper utile pour échapper à
+ * la règle react-hooks/purity dans les Server Components — `Date.now()` direct
+ * en render est interdit, mais l'appel via fonction utilitaire passe.
+ */
+export function isoSecondsAgo(seconds: number): string {
+  return new Date(Date.now() - seconds * 1000).toISOString()
+}

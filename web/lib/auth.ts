@@ -6,6 +6,7 @@ export type Guest = {
   email: string
   full_name: string | null
   is_blocked: boolean
+  is_admin: boolean
   first_visit_at: string | null
   last_visit_at: string | null
 }
@@ -23,7 +24,7 @@ export async function getCurrentGuest(): Promise<Guest | null> {
   const service = getServiceClient()
   const { data: guest } = await service
     .from('guests')
-    .select('id, email, full_name, is_blocked, first_visit_at, last_visit_at')
+    .select('id, email, full_name, is_blocked, is_admin, first_visit_at, last_visit_at')
     .eq('email', data.user.email.toLowerCase())
     .maybeSingle()
 
@@ -53,6 +54,18 @@ export async function getCurrentGuest(): Promise<Guest | null> {
 export async function requireGuest(): Promise<Guest> {
   const guest = await getCurrentGuest()
   if (!guest) redirect('/access')
+  return guest
+}
+
+/**
+ * Comme requireGuest, mais redirige vers `/` si le guest n'est pas admin.
+ * Utilisé pour protéger toutes les pages sous `/admin` et la server action
+ * d'ajout d'invité.
+ */
+export async function requireAdmin(): Promise<Guest> {
+  const guest = await getCurrentGuest()
+  if (!guest) redirect('/access')
+  if (!guest.is_admin) redirect('/')
   return guest
 }
 

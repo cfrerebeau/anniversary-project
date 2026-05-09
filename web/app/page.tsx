@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { requireGuest, getFirstName } from '@/lib/auth'
 import { getServiceClient } from '@/lib/supabase/server'
+import { getCagnotteTotalCents } from '@/lib/cagnotte'
 import { BACard } from '@/components/design/card'
 import { BAFooter } from '@/components/design/footer'
 import { PageContainer } from '@/components/design/page-container'
@@ -14,16 +15,17 @@ export default async function HomePage() {
   const guest = await requireGuest()
   const firstName = getFirstName(guest)
 
-  const weddingISO = process.env.NEXT_PUBLIC_WEDDING_DATE ?? '2026-09-12'
+  const weddingISO = process.env.NEXT_PUBLIC_WEDDING_DATE ?? '2026-05-23'
   const dLeft = daysUntil(weddingISO)
 
   const service = getServiceClient()
-  const { data: cache } = await service
-    .from('cagnotte_balance_cache')
-    .select('amount_cents')
-    .eq('id', 1)
-    .single()
-  const total = cache?.amount_cents ?? 0
+  const [total, photosCountRes, anecdotesCountRes] = await Promise.all([
+    getCagnotteTotalCents(),
+    service.from('photos').select('*', { count: 'exact', head: true }),
+    service.from('anecdotes').select('*', { count: 'exact', head: true }),
+  ])
+  const photoCount = photosCountRes.count ?? 0
+  const anecdoteCount = anecdotesCountRes.count ?? 0
   const whatsappUrl = process.env.NEXT_PUBLIC_WHATSAPP_URL ?? ''
 
   return (
@@ -86,16 +88,13 @@ export default async function HomePage() {
             style={{ top: 14, right: 14, transform: 'rotate(8deg)' }}
             aria-hidden
           >
-            <span
-              className="ba-rubber"
-              style={{
-                color: 'rgba(244,237,224,.55)',
-                fontSize: 9,
-                borderColor: 'rgba(244,237,224,.4)',
-              }}
-            >
-              Cagnotte · 01
-            </span>
+            <Image
+              src="/cagnotte.png"
+              alt=""
+              width={56}
+              height={64}
+              style={{ objectFit: 'contain', opacity: 0.92 }}
+            />
           </div>
           <div
             className="font-mono text-[11px] tracking-[0.18em] uppercase"
@@ -141,22 +140,24 @@ export default async function HomePage() {
           abbr="ph."
           title="Tes vieilles photos d'eux."
           body="Voyages, soirées, mariages d'amis. Promis on garde tout pour nous."
+          meta={photoCount > 0 ? `${photoCount} ${photoCount > 1 ? 'photos partagées' : 'photo partagée'}` : null}
         />
         <SecondaryCard
           href="/anecdotes"
-          tagColor="bg-gold"
-          abbr="anec."
+          iconSrc="/anecdotes.png"
+          iconAlt="Anecdotes"
           title="Une anecdote à raconter."
           body="Un truc qu'ils ont dit, fait, ou survécu ensemble."
+          meta={anecdoteCount > 0 ? `${anecdoteCount} ${anecdoteCount > 1 ? 'anecdotes racontées' : 'anecdote racontée'}` : null}
         />
         {whatsappUrl && (
           <SecondaryCard
             external
             href={whatsappUrl}
-            tagColor="bg-stamp"
-            abbr="sos."
-            title="Une question, une idée ?"
-            body="Le groupe WhatsApp pour tes pépins techniques ou tes suggestions. On répond vite."
+            iconSrc="/whatsapp.png"
+            iconAlt="WhatsApp"
+            title="Rejoins la discussion."
+            body="Le groupe WhatsApp pour papoter, partager des idées et garder le secret ensemble."
           />
         )}
       </div>
@@ -174,31 +175,55 @@ function SecondaryCard({
   href,
   tagColor,
   abbr,
+  iconSrc,
+  iconAlt,
   title,
   body,
+  meta,
   external = false,
 }: {
   href: string
-  tagColor: string
-  abbr: string
+  tagColor?: string
+  abbr?: string
+  iconSrc?: string
+  iconAlt?: string
   title: string
   body: string
+  meta?: string | null
   external?: boolean
 }) {
   const className =
     'ba-btn flex items-center gap-[14px] bg-paper-soft border border-paper-edge rounded-[18px] p-[18px] text-ink'
+  const visual = iconSrc ? (
+    <div className="shrink-0 relative" style={{ width: 48, height: 56 }} aria-hidden>
+      <Image
+        src={iconSrc}
+        alt={iconAlt ?? ''}
+        fill
+        sizes="48px"
+        style={{ objectFit: 'contain' }}
+      />
+    </div>
+  ) : (
+    <div
+      className={`${tagColor} relative shrink-0 flex items-center justify-center rounded-[4px]`}
+      style={{ width: 48, height: 56, boxShadow: '0 6px 14px -8px rgba(76,50,30,.4)' }}
+      aria-hidden
+    >
+      <span className="font-serif italic text-paper text-[17px]">{abbr}</span>
+    </div>
+  )
   const inner = (
     <>
-      <div
-        className={`${tagColor} relative shrink-0 flex items-center justify-center rounded-[4px]`}
-        style={{ width: 48, height: 56, boxShadow: '0 6px 14px -8px rgba(76,50,30,.4)' }}
-        aria-hidden
-      >
-        <span className="font-serif italic text-paper text-[17px]">{abbr}</span>
-      </div>
+      {visual}
       <div className="flex-1">
         <div className="font-serif text-[22px] leading-[1.1]">{title}</div>
         <div className="text-[13px] text-ink-soft mt-[4px] leading-[1.4]">{body}</div>
+        {meta && (
+          <div className="font-mono text-[11px] text-ink-mute tracking-[0.08em] uppercase mt-[6px]">
+            {meta}
+          </div>
+        )}
       </div>
       <IconArrow size={16} className="text-ink-mute" />
     </>
