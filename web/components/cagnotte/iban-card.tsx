@@ -91,7 +91,7 @@ export function IbanCard({ iban, bic, reference }: { iban: string; bic: string; 
 
       {/* RIB téléchargeable — preuve d'ownership délivrée par Wise */}
       <a
-        href="/rib-cabanon.pdf"
+        href="/rib.pdf"
         target="_blank"
         rel="noopener"
         className="ba-btn flex items-center gap-[10px] py-[14px] px-[16px] border-t border-paper-edge text-ink hover:bg-paper-deep"

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { PageContainer } from '@/components/design/page-container'
+import { HashSessionHandler } from '@/components/auth/hash-session-handler'
 import { AccessForm } from './access-form'
 
 // Metadata locale pour /access — ultra-générique. Aucun signe distinctif.
@@ -31,6 +32,7 @@ export default function AccessPage() {
           </p>
 
           <AccessForm />
+          <HashSessionHandler />
         </div>
 
         <div className="pt-[18px] text-[12px] text-ink-mute text-center leading-[1.5]">

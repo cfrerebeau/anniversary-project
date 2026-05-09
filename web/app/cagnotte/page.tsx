@@ -96,7 +96,7 @@ export default async function CagnottePage() {
             href="/"
             className="ba-btn bg-transparent text-ink-soft text-[13px] underline underline-offset-[3px] p-[6px]"
           >
-            retour au cabanon
+            retour à l&apos;accueil
           </Link>
         </div>
       </div>

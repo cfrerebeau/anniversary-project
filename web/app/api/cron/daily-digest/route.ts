@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
 
   await sendEmail({
     to: recipients,
-    subject: 'Cabanon — bilan des dernières 24h',
+    subject: 'Bilan des dernières 24h',
     text: lines.join('\n'),
   })
 

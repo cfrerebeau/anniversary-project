@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { IconBack } from './icons'
 
-export function BAHeader({ backHref = '/', label = 'cabanon' }: { backHref?: string; label?: string }) {
+export function BAHeader({ backHref = '/', label = 'accueil' }: { backHref?: string; label?: string }) {
   return (
     <div className="flex items-center justify-between px-[18px] pt-[8px] pb-[4px] min-h-[44px]">
       <Link

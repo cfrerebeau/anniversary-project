@@ -149,7 +149,7 @@ async function main() {
       '',
       'On prépare une surprise pour Brice & Alix — un cadeau collectif et de quoi remplir un beau jour de mariage. Tu fais partie des complices.',
       '',
-      'Voici ton lien d\'accès au cabanon (un seul clic, pas de mot de passe) :',
+      'Voici ton lien d\'accès (un seul clic, pas de mot de passe) :',
       url,
       '',
       "Le lien expire dans une heure. Si besoin, demande-le à nouveau depuis le site.",
@@ -159,7 +159,7 @@ async function main() {
       const { error: emailErr } = await resend.emails.send({
         from: RESEND_FROM_EMAIL,
         to: [row.email],
-        subject: 'Ton lien pour le cabanon',
+        subject: "Ton lien d'accès",
         text: `${text}\n\n— 🤫 Brice & Alix ne savent pas qu'on prépare ça. Garde le secret.`,
       })
       if (emailErr) {

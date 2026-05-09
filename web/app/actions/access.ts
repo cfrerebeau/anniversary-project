@@ -82,11 +82,11 @@ export async function requestAccessLink(formData: FormData): Promise<{
         if (error || !data?.properties?.action_link) return
         await sendEmail({
           to: email,
-          subject: 'Ton lien pour le cabanon',
+          subject: "Ton lien d'accès",
           text: [
             'Salut,',
             '',
-            "Voici ton lien d'accès au cabanon. Un seul clic, pas de mot de passe :",
+            "Voici ton lien d'accès. Un seul clic, pas de mot de passe :",
             '',
             data.properties.action_link,
             '',
