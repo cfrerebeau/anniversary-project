@@ -143,11 +143,11 @@ export default async function HomePage() {
           body="Voyages, soirées, mariages d'amis. Promis on garde tout pour nous."
         />
         <SecondaryCard
-          href="/anecdotes"
+          href="/quizz"
           tagColor="bg-gold"
-          abbr="anec."
-          title="Une anecdote à raconter."
-          body="Un truc qu'ils ont dit, fait, ou survécu ensemble."
+          abbr="quizz"
+          title="Une question pour le quizz."
+          body="Une histoire d'eux, transformée en question piège pour le jour J."
         />
         {whatsappUrl && (
           <SecondaryCard

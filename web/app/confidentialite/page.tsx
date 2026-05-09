@@ -30,8 +30,8 @@ export default function ConfidentialitePage() {
               <strong className="text-ink">Prénom / nom</strong> : pour personnaliser le site.
             </li>
             <li>
-              <strong className="text-ink">Anecdotes, photos, messages</strong> : ce que tu
-              déposes volontairement sur le site.
+              <strong className="text-ink">Questions de quizz, photos, messages</strong> : ce que
+              tu déposes volontairement sur le site.
             </li>
             <li>
               <strong className="text-ink">Empreinte d&apos;IP (hashée)</strong> : pour limiter
@@ -67,7 +67,7 @@ export default function ConfidentialitePage() {
         <section>
           <h2 className="font-serif text-[20px] text-ink mb-[6px]">Tes droits</h2>
           <p>
-            Tu peux à tout moment demander la suppression de tes données (anecdotes, photos,
+            Tu peux à tout moment demander la suppression de tes données (questions, photos,
             messages, email) en répondant à l&apos;email d&apos;invitation que tu as reçu.
           </p>
         </section>

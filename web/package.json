@@ -11,7 +11,9 @@
     "test:watch": "vitest",
     "db:push": "supabase db push",
     "db:reset": "supabase db reset --linked",
-    "invite": "tsx scripts/invite-guests.ts"
+    "invite": "tsx scripts/invite-guests.ts",
+    "dev-login": "tsx scripts/dev-login.ts",
+    "export-quiz": "tsx scripts/export-quiz.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

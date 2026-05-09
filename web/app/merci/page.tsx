@@ -19,7 +19,7 @@ type Variant = {
   sign: string
 }
 
-const VARIANTS: Record<'cagnotte' | 'photos' | 'anecdotes', Variant> = {
+const VARIANTS: Record<'cagnotte' | 'photos' | 'quizz', Variant> = {
   cagnotte: {
     eyebrow: 'mot de remerciement',
     stampLabel: 'Merci.',
@@ -38,13 +38,13 @@ const VARIANTS: Record<'cagnotte' | 'photos' | 'anecdotes', Variant> = {
     body: "On a hâte de tout regarder ensemble. Continue à fouiller dans tes vieux dossiers — y'a souvent des pépites en bas du téléphone.",
     sign: 'M., L., T. & les autres',
   },
-  anecdotes: {
-    eyebrow: 'archive enrichie',
+  quizz: {
+    eyebrow: 'quizz enrichi',
     stampLabel: 'Top.',
     stampColor: 'gold',
-    h1: 'Ton anecdote est dans la pile.',
+    h1: 'Ta question est dans la pile.',
     italic: 'pile',
-    body: "On lit tout ce week-end. Si elle finit en quiz, t'auras forcément la bonne réponse — c'est un détail qui compte.",
+    body: "On lit tout ce week-end. Si elle finit dans le quiz, t'auras forcément la bonne réponse — c'est un détail qui compte.",
     sign: 'M., L., T. & les autres',
   },
 }
@@ -61,8 +61,8 @@ export default async function MerciPage(props: PageProps<'/merci'>) {
   await requireGuest()
   const sp = await props.searchParams
   const fromRaw = (Array.isArray(sp.from) ? sp.from[0] : sp.from) ?? 'cagnotte'
-  const kind = (['cagnotte', 'photos', 'anecdotes'] as const).includes(fromRaw as 'cagnotte')
-    ? (fromRaw as 'cagnotte' | 'photos' | 'anecdotes')
+  const kind = (['cagnotte', 'photos', 'quizz'] as const).includes(fromRaw as 'cagnotte')
+    ? (fromRaw as 'cagnotte' | 'photos' | 'quizz')
     : 'cagnotte'
   const v = VARIANTS[kind]
 
@@ -151,8 +151,8 @@ export default async function MerciPage(props: PageProps<'/merci'>) {
           {kind !== 'photos' && (
             <NudgeLink href="/photos">déposer des photos</NudgeLink>
           )}
-          {kind !== 'anecdotes' && (
-            <NudgeLink href="/anecdotes">raconter une anecdote</NudgeLink>
+          {kind !== 'quizz' && (
+            <NudgeLink href="/quizz">proposer une question</NudgeLink>
           )}
         </div>
       </div>
