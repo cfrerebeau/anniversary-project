@@ -1,9 +1,9 @@
 'use server'
 
 import { after } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 import { accessSchema } from '@/lib/validators'
 import { getServiceClient } from '@/lib/supabase/server'
-import { sendEmail } from '@/lib/email'
 import { getClientIPHash } from '@/lib/ip'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { randomDelayMs, sleep } from '@/lib/crypto'
@@ -63,45 +63,31 @@ export async function requestAccessLink(formData: FormData): Promise<{
     .eq('email', email)
     .maybeSingle()
 
-  // Cas non-blockés uniquement → générer + envoyer.
+  // Cas non-blockés uniquement → demander à Supabase d'envoyer le magic link
+  // via le SMTP configuré (Gmail). Le template `magic_link.html` produit une
+  // URL vers notre /auth/callback?token_hash=...&type=magiclink que verifyOtp
+  // gère côté serveur et qui pose le cookie de session.
   //
-  // IMPORTANT : le travail "lourd" (generateLink + sendEmail Resend + update DB)
-  // est délégué à `after()` pour ne PAS allonger le temps de réponse — sinon
-  // une mesure du temps de réponse permettrait de distinguer "guest valide" de
+  // Délégué à `after()` pour ne PAS allonger le temps de réponse — sinon une
+  // mesure du temps de réponse permettrait de distinguer "guest valide" de
   // "guest inconnu/blocké". Tout doit revenir à `padDelay` au même rythme.
   if (guest && !guest.is_blocked) {
     const guestId = guest.id
     after(async () => {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-        const { data, error } = await service.auth.admin.generateLink({
-          type: 'magiclink',
+        const anon = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          { auth: { persistSession: false, autoRefreshToken: false } },
+        )
+        const { error } = await anon.auth.signInWithOtp({
           email,
-          options: { redirectTo: `${baseUrl}/auth/callback` },
+          options: { shouldCreateUser: false },
         })
-        if (error || !data?.properties?.hashed_token) return
-        // On contourne le `action_link` (legacy implicit flow → fragment
-        // `#access_token=...` que le serveur ne voit pas). On construit un
-        // lien direct vers notre route, qui vérifie le token via verifyOtp
-        // côté serveur et pose le cookie de session.
-        const params = new URLSearchParams({
-          token_hash: data.properties.hashed_token,
-          type: 'magiclink',
-        })
-        const link = `${baseUrl}/auth/callback?${params.toString()}`
-        await sendEmail({
-          to: email,
-          subject: "Ton lien d'accès",
-          text: [
-            'Salut,',
-            '',
-            "Voici ton lien d'accès. Un seul clic, pas de mot de passe :",
-            '',
-            link,
-            '',
-            'Le lien expire dans une heure. Si besoin, reviens redemander un lien.',
-          ].join('\n'),
-        })
+        if (error) {
+          console.error('[access:after] signInWithOtp', error)
+          return
+        }
         await service
           .from('guests')
           .update({ link_sent_at: new Date().toISOString() })

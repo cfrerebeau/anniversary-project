@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="fr">
+  <body style="font-family: system-ui, -apple-system, sans-serif; line-height: 1.5; color: #1a1a1a;">
+    <p>Salut,</p>
+    <p>Voici ton lien d'accès. Un seul clic, pas de mot de passe :</p>
+    <p>
+      <a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=magiclink">
+        {{ .SiteURL }}/auth/callback
+      </a>
+    </p>
+    <p>Le lien expire dans une heure. Si besoin, reviens redemander un lien.</p>
+    <p style="color: #888; font-size: 0.9em; margin-top: 2em;">
+      — 🤫 Brice &amp; Alix ne savent pas qu'on prépare ça. Garde le secret.
+    </p>
+  </body>
+</html>

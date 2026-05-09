@@ -230,20 +230,20 @@ otp_length = 8
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
-# Use a production-ready SMTP server
-# [auth.email.smtp]
-# enabled = true
-# host = "smtp.sendgrid.net"
-# port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+# Production SMTP — Gmail (temporaire, en attendant un domaine vérifié sur Resend)
+[auth.email.smtp]
+enabled = true
+host = "smtp.gmail.com"
+port = 465
+user = "cfrerebeau@gmail.com"
+pass = "env(GMAIL_APP_PASSWORD)"
+admin_email = "cfrerebeau@gmail.com"
+sender_name = "Rémy et Christophe"
 
-# Uncomment to customize email template
-# [auth.email.template.invite]
-# subject = "You have been invited"
-# content_path = "./supabase/templates/invite.html"
+# Custom magic link email — pointe vers /auth/callback (token_hash + verifyOtp côté serveur)
+[auth.email.template.magic_link]
+subject = "Ton lien d'accès"
+content_path = "./supabase/templates/magic_link.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]
