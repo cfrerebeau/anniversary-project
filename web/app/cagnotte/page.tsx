@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { requireGuest, getFirstName } from '@/lib/auth'
 import { getServiceClient } from '@/lib/supabase/server'
+import { getWiseBalance } from '@/lib/wise'
 import { BAHeader } from '@/components/design/header'
 import { BAPageTitle } from '@/components/design/page-title'
 import { PageContainer } from '@/components/design/page-container'
@@ -16,14 +17,18 @@ export default async function CagnottePage() {
   const firstName = getFirstName(guest)
 
   const service = getServiceClient()
-  const [{ data: cache }, { count }] = await Promise.all([
+  // Live query Wise on each render — toujours frais. Fallback sur le cache
+  // (rafraîchi par le cron quotidien) si Wise est indisponible, pour ne
+  // jamais montrer 0 € sur une coupure transitoire.
+  const [balance, { data: cache }, { count }] = await Promise.all([
+    getWiseBalance(),
     service.from('cagnotte_balance_cache').select('amount_cents').eq('id', 1).single(),
     service
       .from('cagnotte_messages')
       .select('id', { count: 'exact', head: true }),
   ])
 
-  const total = cache?.amount_cents ?? 0
+  const total = balance?.amount_cents ?? cache?.amount_cents ?? 0
   const contributors = count ?? 0
 
   const iban = process.env.CAGNOTTE_IBAN ?? ''
