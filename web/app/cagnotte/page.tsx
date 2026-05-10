@@ -31,8 +31,8 @@ export default async function CagnottePage() {
   const bic = process.env.CAGNOTTE_BIC ?? ''
   const recipient = process.env.CAGNOTTE_RECIPIENT_NAME ?? ''
   const lydiaUrl = process.env.CAGNOTTE_LYDIA_URL ?? ''
-  const wisetagRaw = process.env.CAGNOTTE_WISETAG ?? ''
-  const wisetag = wisetagRaw.trim().replace(/^@/, '')
+  const wisetagUrl = process.env.CAGNOTTE_WISETAG_URL?.trim() ?? ''
+  const wisetagLabel = process.env.CAGNOTTE_WISETAG_LABEL?.trim() ?? ''
   const whatsappUrl = process.env.NEXT_PUBLIC_WHATSAPP_URL ?? ''
 
   return (
@@ -81,10 +81,10 @@ export default async function CagnottePage() {
               />
             </div>
 
-            {wisetag && (
+            {wisetagUrl && (
               <div className="px-[22px] pt-[14px]">
                 <a
-                  href={`https://wise.com/pay/me/${encodeURIComponent(wisetag)}`}
+                  href={wisetagUrl}
                   target="_blank"
                   rel="noreferrer noopener"
                   className="ba-btn w-full bg-transparent border border-paper-edge rounded-[14px] py-[14px] px-[16px] flex items-center gap-[12px] text-ink"
@@ -105,7 +105,7 @@ export default async function CagnottePage() {
                   <div className="flex-1">
                     <div className="text-[15px] font-medium">Payer via Wisetag</div>
                     <div className="text-[12px] text-ink-soft font-mono">
-                      @{wisetag}
+                      {wisetagLabel || stripProtocol(wisetagUrl)}
                     </div>
                   </div>
                   <IconArrow size={16} className="text-ink-mute" />
