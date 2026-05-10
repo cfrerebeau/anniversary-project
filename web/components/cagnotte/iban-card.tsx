@@ -78,17 +78,6 @@ export function IbanCard({ iban, bic, reference }: { iban: string; bic: string; 
         </div>
       ))}
 
-      <div
-        className="p-[16px] flex gap-[10px]"
-        style={{ background: 'rgba(184,146,76,.08)' }}
-      >
-        <div className="text-[18px]" aria-hidden>📌</div>
-        <div className="text-[13px] text-ink-soft leading-[1.45]">
-          N&apos;oublie pas la <strong className="text-ink">référence</strong>, sinon on ne saura
-          pas que c&apos;est toi.
-        </div>
-      </div>
-
       {/* RIB téléchargeable — preuve d'ownership délivrée par Wise */}
       <a
         href="/rib.pdf"

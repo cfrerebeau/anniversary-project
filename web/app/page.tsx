@@ -54,7 +54,8 @@ export default async function HomePage() {
           style={{ textWrap: 'pretty' }}
         >
           On prépare quelque chose pour <span className="ba-pen">Brice &amp; Alix</span>. Un cadeau
-          collectif, en douce. T&apos;en es.
+          collectif, en douce. Envoie des photos sympa, glisse des questions drôles pour le quiz,
+          et bien sûr mets un peu dans la cagnotte si cela te tente.
         </p>
       </div>
 
@@ -109,7 +110,7 @@ export default async function HomePage() {
             className="text-[14px] leading-[1.45]"
             style={{ color: 'rgba(244,237,224,.75)', maxWidth: 280 }}
           >
-            Un compte dédié, un IBAN, ce que tu veux. Pas de pression sur le montant.
+            Tu souhaites participer à un cadeau, c&apos;est par là.
           </div>
           <div className="flex items-center justify-between mt-[18px]">
             <div>

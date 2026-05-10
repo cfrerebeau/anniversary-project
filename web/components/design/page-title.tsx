@@ -9,7 +9,7 @@ export function BAPageTitle({
   eyebrow?: string
   title: string
   italicWord?: string
-  sub?: string
+  sub?: React.ReactNode
 }) {
   let display: React.ReactNode = title
   if (italicWord && title.includes(italicWord)) {
