@@ -72,7 +72,7 @@ export default async function CagnottePage() {
             </div>
 
             <div className="px-[22px] pt-[18px]">
-              <IbanCard iban={iban} bic={bic} reference={reference} />
+              <IbanCard iban={iban} bic={bic} reference={reference} beneficiary={recipient} />
             </div>
 
             {lydiaUrl && (

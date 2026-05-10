@@ -5,10 +5,23 @@ import { BACard } from '@/components/design/card'
 import { BAEyebrow } from '@/components/design/eyebrow'
 import { IconArrow, IconCheck, IconCopy, IconFile } from '@/components/design/icons'
 
-type Row = { label: string; value: string; key: 'iban' | 'bic' | 'ref' }
+type Row = { label: string; value: string; key: 'beneficiary' | 'iban' | 'bic' | 'ref' }
 
-export function IbanCard({ iban, bic, reference }: { iban: string; bic: string; reference: string }) {
+export function IbanCard({
+  iban,
+  bic,
+  reference,
+  beneficiary,
+}: {
+  iban: string
+  bic: string
+  reference: string
+  beneficiary?: string
+}) {
   const rows: Row[] = [
+    ...(beneficiary
+      ? [{ label: 'Bénéficiaire', value: beneficiary, key: 'beneficiary' as const }]
+      : []),
     { label: 'IBAN', value: iban, key: 'iban' },
     { label: 'BIC', value: bic, key: 'bic' },
     { label: 'Référence (important)', value: reference, key: 'ref' },
