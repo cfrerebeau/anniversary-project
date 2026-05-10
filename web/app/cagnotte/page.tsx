@@ -31,6 +31,8 @@ export default async function CagnottePage() {
   const bic = process.env.CAGNOTTE_BIC ?? ''
   const recipient = process.env.CAGNOTTE_RECIPIENT_NAME ?? ''
   const lydiaUrl = process.env.CAGNOTTE_LYDIA_URL ?? ''
+  const wisetagRaw = process.env.CAGNOTTE_WISETAG ?? ''
+  const wisetag = wisetagRaw.trim().replace(/^@/, '')
   const whatsappUrl = process.env.NEXT_PUBLIC_WHATSAPP_URL ?? ''
 
   return (
@@ -78,6 +80,38 @@ export default async function CagnottePage() {
                 beneficiary={recipient}
               />
             </div>
+
+            {wisetag && (
+              <div className="px-[22px] pt-[14px]">
+                <a
+                  href={`https://wise.com/pay/me/${encodeURIComponent(wisetag)}`}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="ba-btn w-full bg-transparent border border-paper-edge rounded-[14px] py-[14px] px-[16px] flex items-center gap-[12px] text-ink"
+                >
+                  <div
+                    className="shrink-0 relative"
+                    style={{ width: 32, height: 32 }}
+                    aria-hidden
+                  >
+                    <Image
+                      src="/wise.svg"
+                      alt=""
+                      fill
+                      sizes="32px"
+                      style={{ objectFit: 'contain' }}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-[15px] font-medium">Payer via Wisetag</div>
+                    <div className="text-[12px] text-ink-soft font-mono">
+                      @{wisetag}
+                    </div>
+                  </div>
+                  <IconArrow size={16} className="text-ink-mute" />
+                </a>
+              </div>
+            )}
 
             {lydiaUrl && (
               <div className="px-[22px] pt-[14px]">
