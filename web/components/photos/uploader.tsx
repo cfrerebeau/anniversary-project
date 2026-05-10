@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { BACard } from '@/components/design/card'
 import { BAEyebrow } from '@/components/design/eyebrow'
 import { IconCheck, IconUpload } from '@/components/design/icons'
@@ -27,6 +28,18 @@ export function PhotosUploader() {
   const [active, setActive] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter()
+  // Debounce des refresh : un upload multi-fichiers (10 photos en parallèle)
+  // déclencherait sinon 10 re-fetches du RSC `/photos`. On regroupe en un
+  // seul refresh quand la file est calme depuis 400 ms.
+  const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  function scheduleGridRefresh() {
+    if (refreshTimer.current) clearTimeout(refreshTimer.current)
+    refreshTimer.current = setTimeout(() => {
+      refreshTimer.current = null
+      router.refresh()
+    }, 400)
+  }
 
   function addFiles(fileList: FileList | null) {
     if (!fileList || !fileList.length) return
@@ -116,6 +129,10 @@ export function PhotosUploader() {
           it.id === itemId ? { ...it, state: 'done', progress: 100, rowId: proc.id } : it,
         ),
       )
+      // La grille « Tes photos » est rendue côté serveur par /photos. On
+      // déclenche un re-fetch debouncé pour qu'elle inclue les nouvelles
+      // photos (un seul refresh par batch d'uploads).
+      scheduleGridRefresh()
     } catch (err) {
       console.error('[uploader]', err)
       markError(itemId, 'Erreur réseau. Réessaie.')

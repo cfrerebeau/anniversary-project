@@ -31,6 +31,13 @@ vi.mock('next/navigation', () => ({
   },
 }))
 
+vi.mock('next/server', () => ({
+  // Hors scope de requête (vitest) : on exécute le callback immédiatement.
+  after: (cb: () => unknown | Promise<unknown>) => {
+    void Promise.resolve().then(cb)
+  },
+}))
+
 vi.mock('@/lib/supabase/server', () => {
   return {
     getServerClient: async () => ({

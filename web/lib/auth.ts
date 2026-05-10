@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { after } from 'next/server'
 import { getServerClient, getServiceClient } from '@/lib/supabase/server'
 
 export type Guest = {
@@ -30,19 +31,25 @@ export async function getCurrentGuest(): Promise<Guest | null> {
 
   if (!guest || guest.is_blocked) return null
 
-  // Met à jour first_visit_at / last_visit_at en best-effort (fire & forget).
+  // Met à jour first_visit_at / last_visit_at après la réponse via after().
   // Guard 1h : pas la peine d'écrire à chaque page load — un guest qui
   // navigue génère sinon un UPDATE par RSC.
+  // Le PostgrestBuilder de Supabase ne lance la requête HTTP qu'au .then() :
+  // on doit `await` (dans after, hors du chemin critique) sinon rien ne part.
   const lastVisitMs = guest.last_visit_at ? new Date(guest.last_visit_at).getTime() : 0
   const oneHourAgo = Date.now() - 3600_000
   if (!guest.first_visit_at || lastVisitMs < oneHourAgo) {
-    void service
-      .from('guests')
-      .update({
-        first_visit_at: guest.first_visit_at ?? new Date().toISOString(),
-        last_visit_at: new Date().toISOString(),
-      })
-      .eq('id', guest.id)
+    const guestId = guest.id
+    const firstVisitAt = guest.first_visit_at ?? new Date().toISOString()
+    after(async () => {
+      await service
+        .from('guests')
+        .update({
+          first_visit_at: firstVisitAt,
+          last_visit_at: new Date().toISOString(),
+        })
+        .eq('id', guestId)
+    })
   }
 
   return guest as Guest

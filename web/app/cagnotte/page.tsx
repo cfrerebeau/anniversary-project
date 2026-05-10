@@ -29,7 +29,6 @@ export default async function CagnottePage() {
 
   const iban = process.env.CAGNOTTE_IBAN ?? ''
   const bic = process.env.CAGNOTTE_BIC ?? ''
-  const reference = process.env.CAGNOTTE_REFERENCE ?? 'CADEAU-BA'
   const recipient = process.env.CAGNOTTE_RECIPIENT_NAME ?? ''
   const lydiaUrl = process.env.CAGNOTTE_LYDIA_URL ?? ''
   const whatsappUrl = process.env.NEXT_PUBLIC_WHATSAPP_URL ?? ''
@@ -72,7 +71,12 @@ export default async function CagnottePage() {
             </div>
 
             <div className="px-[22px] pt-[18px]">
-              <IbanCard iban={iban} bic={bic} reference={reference} beneficiary={recipient} />
+              <IbanCard
+                iban={iban}
+                bic={bic}
+                defaultReference={firstName}
+                beneficiary={recipient}
+              />
             </div>
 
             {lydiaUrl && (

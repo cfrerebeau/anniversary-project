@@ -5,17 +5,17 @@ import { BACard } from '@/components/design/card'
 import { BAEyebrow } from '@/components/design/eyebrow'
 import { IconArrow, IconCheck, IconCopy, IconFile } from '@/components/design/icons'
 
-type Row = { label: string; value: string; key: 'beneficiary' | 'iban' | 'bic' | 'ref' }
+type Row = { label: string; value: string; key: 'beneficiary' | 'iban' | 'bic' }
 
 export function IbanCard({
   iban,
   bic,
-  reference,
+  defaultReference = '',
   beneficiary,
 }: {
   iban: string
   bic: string
-  reference: string
+  defaultReference?: string
   beneficiary?: string
 }) {
   const rows: Row[] = [
@@ -24,15 +24,17 @@ export function IbanCard({
       : []),
     { label: 'IBAN', value: iban, key: 'iban' },
     { label: 'BIC', value: bic, key: 'bic' },
-    { label: 'Référence (important)', value: reference, key: 'ref' },
   ]
-  const [copied, setCopied] = useState<Row['key'] | null>(null)
+  type CopyKey = Row['key'] | 'ref'
+  const [copied, setCopied] = useState<CopyKey | null>(null)
+  const [reference, setReference] = useState(defaultReference)
 
-  function copy(row: Row) {
+  function copy(key: CopyKey, value: string) {
+    if (!value) return
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(row.value).catch(() => {})
+      navigator.clipboard.writeText(value).catch(() => {})
     }
-    setCopied(row.key)
+    setCopied(key)
     setTimeout(() => setCopied(null), 1500)
   }
 
@@ -43,12 +45,10 @@ export function IbanCard({
         <div className="font-serif text-[22px] mt-[4px]">Vire-le ici.</div>
       </div>
 
-      {rows.map((row, i) => (
+      {rows.map((row) => (
         <div
           key={row.key}
-          className={`flex items-center gap-[12px] px-[20px] py-[14px] ${
-            i < rows.length - 1 ? 'border-b border-paper-edge' : ''
-          }`}
+          className="flex items-center gap-[12px] px-[20px] py-[14px] border-b border-paper-edge"
         >
           <div className="flex-1 min-w-0">
             <div
@@ -74,7 +74,7 @@ export function IbanCard({
               color: copied === row.key ? 'var(--color-success)' : 'var(--color-ink)',
               border: `1px solid ${copied === row.key ? 'rgba(94,122,82,.3)' : 'var(--color-paper-edge)'}`,
             }}
-            onClick={() => copy(row)}
+            onClick={() => copy(row.key, row.value)}
             disabled={!row.value}
             aria-label={`copier ${row.label}`}
           >
@@ -90,6 +90,50 @@ export function IbanCard({
           </button>
         </div>
       ))}
+
+      <div className="flex items-center gap-[12px] px-[20px] py-[14px]">
+        <div className="flex-1 min-w-0">
+          <div
+            className="text-[11px] text-ink-mute uppercase mb-[4px]"
+            style={{ letterSpacing: '0.04em' }}
+          >
+            Référence (ton nom, ou « Cadeau BA »)
+          </div>
+          <input
+            type="text"
+            value={reference}
+            onChange={(e) => setReference(e.target.value)}
+            placeholder="Ton nom — ou Cadeau BA"
+            className="font-mono text-[14px] text-ink bg-transparent border-0 p-0 w-full outline-none focus:ring-0 placeholder:text-ink-mute"
+            style={{ letterSpacing: '0.02em' }}
+            aria-label="Référence du virement"
+          />
+        </div>
+        <button
+          type="button"
+          className="ba-btn rounded-[10px] py-[10px] px-[12px] text-[13px] font-medium flex items-center gap-[6px] justify-center"
+          style={{
+            minWidth: 88,
+            background:
+              copied === 'ref' ? 'rgba(94,122,82,.14)' : 'var(--color-paper)',
+            color: copied === 'ref' ? 'var(--color-success)' : 'var(--color-ink)',
+            border: `1px solid ${copied === 'ref' ? 'rgba(94,122,82,.3)' : 'var(--color-paper-edge)'}`,
+          }}
+          onClick={() => copy('ref', reference.trim())}
+          disabled={!reference.trim()}
+          aria-label="copier la référence"
+        >
+          {copied === 'ref' ? (
+            <>
+              <IconCheck size={14} /> copié
+            </>
+          ) : (
+            <>
+              <IconCopy size={14} /> copier
+            </>
+          )}
+        </button>
+      </div>
 
       {/* RIB téléchargeable — preuve d'ownership délivrée par Wise */}
       <a
