@@ -80,10 +80,24 @@ export async function requestAccessLink(formData: FormData): Promise<{
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
           { auth: { persistSession: false, autoRefreshToken: false } },
         )
-        const { error } = await anon.auth.signInWithOtp({
-          email,
-          options: { shouldCreateUser: false },
-        })
+        const send = () =>
+          anon.auth.signInWithOtp({ email, options: { shouldCreateUser: false } })
+
+        let { error } = await send()
+        // Self-heal : un guest peut exister en DB sans entrée auth.users (insertion
+        // directe sans passer par `pnpm invite`). Supabase répond alors `otp_disabled`.
+        // On provisionne l'auth user à la volée puis on retente une fois.
+        if (error && (error as { code?: string }).code === 'otp_disabled') {
+          const { error: createErr } = await service.auth.admin.createUser({
+            email,
+            email_confirm: true,
+          })
+          if (createErr) {
+            console.error('[access:after] createUser', createErr)
+            return
+          }
+          ;({ error } = await send())
+        }
         if (error) {
           console.error('[access:after] signInWithOtp', error)
           return

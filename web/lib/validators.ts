@@ -6,6 +6,11 @@ export const accessSchema = z.object({
   email: emailSchema,
 })
 
+export const inviteSchema = z.object({
+  email: emailSchema,
+  first_name: z.string().trim().min(1).max(80),
+})
+
 export const cagnotteMessageSchema = z.object({
   display_name: z.string().trim().min(1).max(80),
   amount_cents: z.coerce.number().int().min(0).max(1_000_000).optional(),
