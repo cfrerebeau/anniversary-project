@@ -8,7 +8,7 @@ export function BAFooter() {
   return (
     <div className="px-[22px] pt-[24px] pb-[30px] text-center">
       <div className="font-mono text-[10px] text-ink-mute tracking-[0.18em] uppercase">
-        le mariage · {date}
+        la fête · {date}
       </div>
       <div className="text-[12px] text-ink-mute mt-[8px] leading-[1.5]">
         Ce site est une surprise. Pas un mot. <span className="whitespace-nowrap">🤫</span>
