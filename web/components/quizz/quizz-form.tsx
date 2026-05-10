@@ -62,7 +62,7 @@ export function QuizzForm() {
         <BACard className="p-[26px] text-center">
           <div className="ba-pop inline-block">
             <span className="ba-rubber text-olive" style={{ fontSize: 12 }}>
-              Question dans la pioche
+              Question ajoutée au quizz !
             </span>
           </div>
           <div className="font-serif text-[28px] mt-[16px] leading-[1.1]">
@@ -109,7 +109,7 @@ export function QuizzForm() {
               minLength={8}
             />
             <div className="text-[11px] text-ink-mute mt-[6px] ml-[2px] flex justify-between">
-              <span>Une vraie anecdote, transformée en devinette.</span>
+              <span>Une vraie histoire, transformée en devinette.</span>
               <span>{question.length}/280</span>
             </div>
           </div>

@@ -27,12 +27,12 @@ Audience : ~50–150 invités complices, en français, ouvrent ça sur iPhone à
 Trois flows :
 1. **Cagnotte** — page affichant IBAN/BIC/référence d'un **compte Wise EUR dédié** + bouton "Copier l'IBAN" + lien Lydia secondaire optionnel + total cumulé live (lu via API Wise) + formulaire optionnel "Laisse-nous un mot" (prénom + montant déclaré + message). Aucun paiement traité par le site.
 2. **Photos souvenirs** — collectées **avant le jour J**. Page "Partage un souvenir". Drag & drop multi-fichiers, **upload direct client → Supabase Storage** via `createSignedUploadUrl` (le client PUT directement vers le bucket avec le token signé, le serveur ne voit jamais le fichier brut). Une edge function ou route handler post-upload redimensionne à max 2000px côté long et écrit la version optimisée, supprime l'original, écrit la metadata en base. Pas d'affichage public. Légende fortement encouragée (placeholder : "Quand ? Où ? C'était quoi ?"). Fenêtre d'upload : ouverture immédiate, fermeture J−7.
-3. **Anecdotes** — formulaire texte (prénom optionnel, anecdote, question de quiz suggérée). Server Action, écriture directe en base.
+3. **Quizz** — formulaire structuré (prénom optionnel, énoncé de la question, 2 à 4 options de réponse, marquage de la bonne réponse). Server Action, écriture directe en base.
 
 **Authentification : liens magiques par invité, hybride Supabase + Resend.** Brice & Alix fournissent une liste d'emails. Pour chaque guest, on appelle `supabase.auth.admin.generateLink({ type: 'magiclink', email })` côté serveur, on récupère l'URL générée, et on l'envoie via Resend dans un email personnalisé sur-mesure (pas le template Supabase par défaut). Le clic crée une session Supabase. Server-side, on lit l'identité avec `supabase.auth.getUser()` dans les Server Components. Page `/access` pour redemander un lien si perdu (server action qui re-déclenche `generateLink` + Resend).
 
 **Pas d'interface admin custom en v1.** Brice & Alix consultent les soumissions via :
-- Supabase Studio (DB browser hébergé) — accès direct aux tables `cagnotte_messages`, `anecdotes`, `photos`
+- Supabase Studio (DB browser hébergé) — accès direct aux tables `cagnotte_messages`, `quizz`, `photos`
 - digest email quotidien (cron Vercel + Resend)
 
 > Ne pas figer un montant cible pour la cagnotte ni l'usage final des photos. Le code reste générique sur ces deux points.
@@ -58,8 +58,8 @@ Trois flows :
 | `/access` | Server Action | **Seule page publique**, aucun élément qui révèle de qui il s'agit. Form email → si match guest non-blocké, génère lien magique + envoie Resend. Si pas de match OU `is_blocked=true`, **comportement identique côté UI** (même message, même délai). Rate limit strict (5/h/IP). |
 | `/cagnotte` | RSC + Client | Bloc IBAN/BIC/référence + bouton copier + lien Lydia + total live + formulaire "laisse un mot". |
 | `/photos` | Client, gated | Drag & drop multi-fichiers, upload via Supabase signed URL, traitement post-upload (resize), écriture meta en base via Server Action. |
-| `/anecdotes` | RSC + Client | Formulaire react-hook-form, Server Action, validation Zod. |
-| `/merci` | RSC | Confirmation post-action. Ton tendre, pas transactionnel. Variant via query param (`?from=cagnotte\|photos\|anecdotes`). |
+| `/quizz` | RSC + Client | Formulaire react-hook-form (énoncé + options dynamiques + bonne réponse), Server Action, validation Zod. |
+| `/merci` | RSC | Confirmation post-action. Ton tendre, pas transactionnel. Variant via query param (`?from=cagnotte\|photos\|quizz`). |
 | `/mentions-legales` | RSC | Texte statique. |
 | `/confidentialite` | RSC | Texte statique. |
 | `/auth/callback` | Route Handler | Géré par `@supabase/ssr` — consomme le code OAuth/magic link et set la session cookie. |
@@ -110,15 +110,23 @@ create table cagnotte_balance_cache (
 );
 insert into cagnotte_balance_cache (id) values (1);
 
-create table anecdotes (
+create table quizz (
   id uuid primary key default gen_random_uuid(),
   guest_id uuid references guests(id) on delete set null,
   uploader_name text,
-  story text not null,
-  quiz_question text,
+  question_text text not null,
+  options jsonb not null,                          -- ["A","B","C"] entre 2 et 4 entrées
+  correct_index int not null,                      -- index de la bonne réponse dans options
   ip_hash text,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  constraint quizz_options_is_array
+    check (jsonb_typeof(options) = 'array'),
+  constraint quizz_options_count
+    check (jsonb_array_length(options) between 2 and 4),
+  constraint quizz_correct_index_in_range
+    check (correct_index >= 0 and correct_index < jsonb_array_length(options))
 );
+create index idx_quizz_created on quizz(created_at desc);
 
 create table photos (
   id uuid primary key default gen_random_uuid(),
@@ -205,7 +213,7 @@ CRON_SECRET=                                # token requis par Vercel Cron pour 
 5. **IP toujours hashée** (sha256 avec sel `IP_HASH_SALT`), jamais stockée en clair.
 6. **Rate limiting** :
    - `/access` : 5 demandes/h/IP (sinon brute-force d'emails)
-   - `/anecdotes` : 5 envois/h/IP
+   - `/quizz` : 5 envois/h/IP
    - `/photos` upload : 20 uploads/h/IP
    - `/cagnotte` message : 10 messages/h/IP
 7. **Pas de cookie banner agressif** — bandeau RGPD discret avec lien vers `/confidentialite`.
@@ -218,7 +226,7 @@ CRON_SECRET=                                # token requis par Vercel Cron pour 
 ## Tests
 
 - Tests unitaires (Vitest) pour la couche `lib/` (validators Zod, formatage des montants, hash IP, génération/comparaison de magic tokens, cookie signing).
-- Un test E2E (Playwright) pour le happy path "anecdote sans guest" et "photo upload avec guest".
+- Un test E2E (Playwright) pour le happy path "question de quizz sans guest" et "photo upload avec guest".
 - Pas de test E2E pour Wise / Vercel Blob en v1 — vérification manuelle.
 
 ## Ce que je veux comme plan

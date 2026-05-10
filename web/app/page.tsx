@@ -19,13 +19,13 @@ export default async function HomePage() {
   const dLeft = daysUntil(weddingISO)
 
   const service = getServiceClient()
-  const [total, photosCountRes, anecdotesCountRes] = await Promise.all([
+  const [total, photosCountRes, quizzCountRes] = await Promise.all([
     getCagnotteTotalCents(),
     service.from('photos').select('*', { count: 'exact', head: true }),
-    service.from('anecdotes').select('*', { count: 'exact', head: true }),
+    service.from('quizz').select('*', { count: 'exact', head: true }),
   ])
   const photoCount = photosCountRes.count ?? 0
-  const anecdoteCount = anecdotesCountRes.count ?? 0
+  const quizzCount = quizzCountRes.count ?? 0
   const whatsappUrl = process.env.NEXT_PUBLIC_WHATSAPP_URL ?? ''
 
   return (
@@ -144,10 +144,11 @@ export default async function HomePage() {
         />
         <SecondaryCard
           href="/quizz"
-          tagColor="bg-gold"
-          abbr="quizz"
+          iconSrc="/quizz.png"
+          iconAlt="Quizz"
           title="Une question pour le quizz."
           body="Une histoire d'eux, transformée en question piège pour le jour J."
+          meta={quizzCount > 0 ? `${quizzCount} ${quizzCount > 1 ? 'questions proposées' : 'question proposée'}` : null}
         />
         {whatsappUrl && (
           <SecondaryCard

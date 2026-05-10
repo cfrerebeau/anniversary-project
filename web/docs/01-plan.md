@@ -5,12 +5,12 @@
 
 Trois flows pour les invités complices :
 1. **Cagnotte** — collecter des contributions pour un cadeau commun. L'argent est encaissé par l'organisateur (Christophe) sur un compte Wise dédié, remis aux mariés le jour J.
-2. **Anecdotes** — collecter des histoires drôles que les amis ont du couple. Matière première pour un discours, un quiz, ou une animation le jour de la fête.
+2. **Quizz** — collecter des questions à choix multiples (énoncé + 2 à 4 options + bonne réponse) que les amis composent à partir d'histoires qu'ils ont du couple. Matière directement utilisable pour le quiz le jour de la fête.
 3. **Photos souvenirs** — collecter, **avant le jour J**, des photos que les invités ont du couple : voyages communs, soirées passées ensemble, moments mémorables. Matière nostalgique pour un montage / slideshow / album à présenter le jour du mariage. Chaque invité partagera typiquement 1 à 5 photos avec une petite légende ("Été 2019, week-end à Lisbonne").
 
 Hébergement : Vercel. Stack : Next.js. Langue : français.
 
-> **Note** : ne pas figer maintenant le "quoi en faire exactement" pour les photos / anecdotes collectées (slideshow, discours, quiz), ni un montant cible pour la cagnotte. On collecte la matière, les organisateurs décident ensuite.
+> **Note** : ne pas figer maintenant le "quoi en faire exactement" pour les photos collectées (slideshow, discours, montage), ni un montant cible pour la cagnotte. On collecte la matière, les organisateurs décident ensuite. Pour le quizz, le format est figé (questions à choix multiples) mais l'animation autour reste à arbitrer.
 
 ---
 
@@ -33,17 +33,17 @@ Si le couple tombe sur le site avant la date, la surprise est foutue. Conséquen
 ## v1 — ce qu'on livre
 
 ### Pages
-- `/` — uniquement accessible avec session active (lien magique consommé). Sinon redirige vers `/access`. Une fois connecté : photo du couple, **un seul CTA dominant** (la cagnotte), photos et anecdotes plus bas, salutation par prénom, formulaires pré-remplis. Footer "🤫 On garde ça entre nous".
+- `/` — uniquement accessible avec session active (lien magique consommé). Sinon redirige vers `/access`. Une fois connecté : photo du couple, **un seul CTA dominant** (la cagnotte), photos et quizz plus bas, salutation par prénom, formulaires pré-remplis. Footer "🤫 On garde ça entre nous".
 - `/access` — **seule page publique**. Aucun élément qui révèle de qui il s'agit (pas de noms, pas de date, pas de photo). Mini-formulaire "envoie-moi mon lien" : email saisi → si match dans la liste invités, envoi du lien ; si pas de match (ou email du couple en blocklist), même message générique de réponse — silencieusement indistinguable des deux côtés ("Si ton email est dans la liste, tu vas recevoir un lien").
 - `/cagnotte` — landing page expliquant le geste, photo, montants suggérés (20 / 50 / 100 €) à titre indicatif, **bloc IBAN / BIC / référence** (compte EUR Wise dédié) avec bouton "Copier l'IBAN", lien Lydia secondaire optionnel. Total cumulé affiché en live (polling de la balance Wise via API). Formulaire optionnel "Laisse-nous un mot" (prénom + montant indicatif + message) découplé du paiement — pas de vérification, c'est de la matière pour le mur de messages.
 - `/photos` — page "Partage un souvenir avec Brice & Alix". Drag & drop multi-fichiers, upload direct client → Vercel Blob via signed token (`handleUpload`). Nom pré-rempli si lien magique consommé. **Légende fortement encouragée** ("Quand ? Où ? C'était quoi ?") — c'est ce qui rend la photo précieuse pour le couple. Case consentement RGPD obligatoire. Photos fermées à J−7 (laisser le temps de monter quoi que ce soit pour le jour J).
-- `/anecdotes` — formulaire : prénom pré-rempli si guest connu, anecdote (texte libre), question de quiz suggérée. Server Action, pas d'API route.
+- `/quizz` — formulaire : prénom pré-rempli si guest connu, énoncé de la question, 2 à 4 options de réponse, marquage de la bonne réponse. Server Action, pas d'API route.
 - `/merci` — confirmation post-action. **Pas de page transactionnelle blanche** — un mot manuscrit "merci", une photo du couple qui rit. C'est une lettre d'amour, pas un reçu.
 - `/mentions-legales`, `/confidentialite` — obligatoires en France.
 
 **Pas d'interface admin custom en v1.** Brice & Alix consultent les soumissions via :
-- Supabase Studio (DB browser hébergé) — accès direct aux tables `cagnotte_messages`, `anecdotes`, `photos`
-- digest email quotidien envoyé par Resend (cron Vercel) listant les nouvelles photos / anecdotes / messages
+- Supabase Studio (DB browser hébergé) — accès direct aux tables `cagnotte_messages`, `quizz`, `photos`
+- digest email quotidien envoyé par Resend (cron Vercel) listant les nouvelles photos / questions de quizz / messages
 - les photos uploadées ne sont **pas affichées publiquement** sur le site en v1 (pas d'affichage = pas besoin de modération à la volée — la curation se fait offline avant le jour J)
 
 ### Stack
@@ -52,8 +52,8 @@ Si le couple tombe sur le site avant la date, la surprise est foutue. Conséquen
 - **Base de données + Auth** : Supabase (free tier). Postgres + Supabase Studio (remplace l'interface admin pour Brice & Alix qui peuvent fouiller via la console hébergée) + Supabase Auth pour les liens magiques. Driver `@supabase/supabase-js`. Migrations SQL brutes dans `/supabase/migrations`. Free tier auto-pause après 7 jours d'inactivité — neutralisé par le cron sync-wise-balance qui tourne toutes les 15 min pendant la fenêtre active.
 - **Cagnotte v1** : compte EUR Wise dédié (alias Gmail `+mariage`, isolation totale du compte principal). Pas de processing côté site — les invités font un virement SEPA. La page affiche IBAN + BIC + référence à utiliser. Total live calculé en lisant la balance Wise via leur API (`GET /v4/profiles/{id}/balances`) — endpoint qui ne nécessite pas de SCA. Cron Vercel toutes les 15 min met à jour la valeur cachée en base. Statement endpoint (transactions individuelles) volontairement reporté en v2 si besoin de réconciliation par contributeur.
 - **Stockage photos** : Supabase Storage (free tier = 1 GB total). Upload direct client via signed URL (Supabase générère une `createSignedUploadUrl`, le client PUT directement vers le bucket). Pour rester sous 1 GB : redimensionnement côté serveur à 2000px max sur le côté long avant write final, via une edge function qui consomme l'upload original puis ré-écrit la version optimisée. Originals supprimés. Image transformations Supabase utilisables pour servir des thumbnails.
-- **Email** : Resend (confirmation contribution, notification admin sur nouvelle anecdote / photo)
-- **Rate limit** : Upstash Redis via Vercel Marketplace (5 anecdotes / heure / IP, 20 photos / heure / IP)
+- **Email** : Resend (confirmation contribution, notification admin sur nouvelle question / photo)
+- **Rate limit** : Upstash Redis via Vercel Marketplace (5 questions de quizz / heure / IP, 20 photos / heure / IP)
 - **UI** : Tailwind + shadcn/ui
 - **Validation** : react-hook-form + Zod
 - **i18n** : aucune lib, copy en français en dur
@@ -94,12 +94,13 @@ cagnotte_balance_cache (
   fetched_at timestamptz not null
 )
 
-anecdotes (
+quizz (
   id uuid pk,
   guest_id uuid references guests(id),
   uploader_name text,
-  story text not null,
-  quiz_question text,
+  question_text text not null,
+  options jsonb not null,                  -- ["A","B","C"] entre 2 et 4 entrées
+  correct_index int not null,              -- index de la bonne réponse dans options
   ip_hash text,
   created_at timestamptz default now()
 )
@@ -137,12 +138,12 @@ audit_log (
 
 ### Cycle de vie
 - Cagnotte : ouverte jusqu'à J+7
-- Anecdotes : fermées à J−3 (pour permettre la construction du quiz si quiz il y a)
+- Quizz : fermé à J−3 (pour permettre le tri et la mise en forme des questions retenues)
 - Photos souvenirs : ouvertes jusqu'à J−7 (laisser le temps aux mariés de monter un slideshow / album / film pour le jour J)
 - Données : supprimées à J+180 sauf demande explicite des mariés de conserver
 
 ### RGPD
-- Consentement explicite sur le formulaire d'anecdotes (case à cocher)
+- Consentement explicite sur le formulaire de quizz (case à cocher)
 - IP hashées (sha256 + sel), jamais stockées en clair
 - Page `/confidentialite` listant les données collectées et la durée
 - Endpoint de demande de suppression (email)
@@ -167,6 +168,6 @@ audit_log (
 | URL ou photo fuite, contenu inapproprié | Aucune galerie publique en v1, photos jamais affichées → fuite sans conséquence |
 | Compte Wise EUR principal (non dédié) reçoit autre chose qu'une cagnotte pendant la fenêtre | Compte EUR Wise SECOND, isolé par alias `+mariage`, jamais utilisé pour autre chose |
 | Limite SEPA inbound Wise dépassée | À €1000 max, très en-deçà des seuils Wise tier de base |
-| Spam sur les anecdotes / photos / messages | Rate limit Upstash + honeypot + lien magique (l'identité guest filtre 99 % du spam) |
+| Spam sur les questions de quizz / photos / messages | Rate limit Upstash + honeypot + lien magique (l'identité guest filtre 99 % du spam) |
 | Pas de plan post-mariage | Cycle de vie défini ci-dessus, suppression J+180, cron Vercel scheduled-task pour la purge |
 | Email magic link ne se rend pas | DKIM/SPF correctement configurés sur le domaine, page `/access` permet de redemander |

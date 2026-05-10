@@ -16,7 +16,7 @@ export default async function QuizzPage() {
           eyebrow="03 · quizz"
           title="Une question pour le quizz."
           italicWord="question"
-          sub="Tu connais une histoire de Brice ou d'Alix ? Transforme-la en question piège pour le quiz du jour J. Plusieurs réponses possibles, une seule vraie."
+          sub="Connais tu bien Brice ou d'Alix ? Trouve des questions pour le quizz du jour J. Plusieurs réponses possibles, une seule vraie."
         />
         <QuizzForm />
         <div className="h-[30px]" />

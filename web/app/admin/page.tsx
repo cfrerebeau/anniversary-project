@@ -22,7 +22,7 @@ export default async function AdminHome() {
     guestsLoggedIn,
     guestsLast24h,
     photosCount,
-    anecdotesCount,
+    quizzCount,
     cagnotteMessagesCount,
   ] = await Promise.all([
     service.from('guests').select('*', { count: 'exact', head: true }),
@@ -36,7 +36,7 @@ export default async function AdminHome() {
       .select('*', { count: 'exact', head: true })
       .gte('last_visit_at', dayAgoISO),
     service.from('photos').select('*', { count: 'exact', head: true }),
-    service.from('anecdotes').select('*', { count: 'exact', head: true }),
+    service.from('quizz').select('*', { count: 'exact', head: true }),
     service.from('cagnotte_messages').select('*', { count: 'exact', head: true }),
   ])
 
@@ -76,12 +76,12 @@ export default async function AdminHome() {
             meta={`${photosCount.count ?? 0} partagées`}
           />
           <NavCard
-            href="/admin/anecdotes"
-            abbr="anec."
+            href="/admin/quizz"
+            abbr="quizz"
             tagColor="bg-stamp"
-            title="Anecdotes"
-            body="Toutes les histoires écrites par les complices."
-            meta={`${anecdotesCount.count ?? 0} racontées`}
+            title="Quizz"
+            body="Toutes les questions proposées par les complices."
+            meta={`${quizzCount.count ?? 0} proposées`}
           />
         </div>
 

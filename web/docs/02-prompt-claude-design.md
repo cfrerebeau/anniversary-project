@@ -31,7 +31,7 @@ Ce site est un **cabanon de complices**, pas un site mariage public.
 ## Principes UX (à respecter sans exception)
 
 1. **Lien magique par invité, envoyé par email.** Friction nulle pour l'invité (un clic = il est connecté). Mais accès strictement gated : sans token valide, seule `/access` est accessible, et `/access` ne révèle rien. Préservation de la surprise > UX confort.
-2. **Un seul CTA dominant** sur la home (post-auth) — la cagnotte. Les anecdotes et photos sont en second, plus bas dans la page, traitées avec un ton plus léger.
+2. **Un seul CTA dominant** sur la home (post-auth) — la cagnotte. Le quizz et les photos sont en second, plus bas dans la page, traités avec un ton plus léger.
 3. **Mobile-first.** 80 % des invités liront ça sur iPhone, dont une partie a 65+ ans. Boutons larges, typo lisible, contraste élevé.
 4. **Le moment de "merci"** doit être tendre, pas transactionnel. Pas de page blanche avec "Merci pour votre paiement". Imagine plutôt : un mot manuscrit "merci", une photo du couple qui rit, une phrase signée Brice & Alix.
 5. **Accessibilité WCAG AA** sur les couleurs et les tailles de touch target (44 × 44 px min).
@@ -58,7 +58,7 @@ Pages à couvrir :
 - `/access` — petit form "renvoie-moi mon lien" si l'invité arrive sans token
 - `/cagnotte`
 - `/photos` (drag & drop multi-fichiers, prévisualisations, barre de progression, état succès, gestion erreurs upload — fichiers refusés, taille trop grosse, etc.)
-- `/anecdotes`
+- `/quizz`
 - `/merci` (générique, ré-utilisée par les trois flows mais avec une nuance par flow)
 - `/mentions-legales`, `/confidentialite` (juste la structure)
 
