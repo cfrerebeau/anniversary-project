@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
   // Reçoivent le digest : les ORGANISATEURS, surtout PAS le couple.
   // Si quelqu'un avait par erreur mis brice@... ou alix@... ici, le contenu
-  // (anecdotes en clair, total cagnotte, etc.) cracherait la surprise.
+  // (questions de quizz en clair, total cagnotte, etc.) cracherait la surprise.
   const recipients = (process.env.ORGANIZER_NOTIFICATION_EMAILS ?? '')
     .split(',')
     .map((s) => s.trim())
@@ -25,10 +25,12 @@ export async function GET(request: NextRequest) {
   const service = getServiceClient()
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
-  const [{ data: anecdotes, count: anecdoteCount }, { data: photos, count: photoCount }, { data: messages, count: msgCount }, { data: balance }] = await Promise.all([
+  const [{ data: quizz, count: quizzCount }, { data: photos, count: photoCount }, { data: messages, count: msgCount }, { data: balance }] = await Promise.all([
     service
-      .from('anecdotes')
-      .select('title, story, uploader_name, created_at', { count: 'exact' })
+      .from('quizz')
+      .select('question_text, options, correct_index, uploader_name, created_at', {
+        count: 'exact',
+      })
       .gte('created_at', since)
       .order('created_at', { ascending: false })
       .limit(20),
@@ -47,7 +49,7 @@ export async function GET(request: NextRequest) {
     service.from('cagnotte_balance_cache').select('amount_cents').eq('id', 1).single(),
   ])
 
-  if ((anecdoteCount ?? 0) + (photoCount ?? 0) + (msgCount ?? 0) === 0) {
+  if ((quizzCount ?? 0) + (photoCount ?? 0) + (msgCount ?? 0) === 0) {
     // Pas de mouvement → on n'envoie pas pour ne pas spammer.
     return NextResponse.json({ ok: true, skipped: 'no_activity' })
   }
@@ -56,17 +58,19 @@ export async function GET(request: NextRequest) {
     `Rapport du ${new Date().toLocaleDateString('fr-FR')}`,
     '',
     `Cagnotte : ${(balance?.amount_cents ?? 0) / 100} €`,
-    `Anecdotes (24h) : ${anecdoteCount ?? 0}`,
+    `Questions quizz (24h) : ${quizzCount ?? 0}`,
     `Photos (24h) : ${photoCount ?? 0}`,
     `Messages (24h) : ${msgCount ?? 0}`,
     '',
   ]
 
-  if (anecdotes && anecdotes.length > 0) {
-    lines.push('## Anecdotes')
-    for (const a of anecdotes) {
-      lines.push(`— ${a.uploader_name ?? 'Anonyme'} : "${a.title ?? '(sans titre)'}"`)
-      lines.push(a.story.slice(0, 200) + (a.story.length > 200 ? '…' : ''))
+  if (quizz && quizz.length > 0) {
+    lines.push('## Questions quizz')
+    for (const q of quizz) {
+      const opts = Array.isArray(q.options) ? (q.options as string[]) : []
+      const good = opts[q.correct_index as number] ?? '?'
+      lines.push(`— ${q.uploader_name ?? 'Anonyme'} : ${q.question_text}`)
+      lines.push(`  réponses : ${opts.join(' · ')} — bonne : « ${good} »`)
       lines.push('')
     }
   }
@@ -95,6 +99,6 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     ok: true,
-    counts: { anecdotes: anecdoteCount, photos: photoCount, messages: msgCount },
+    counts: { quizz: quizzCount, photos: photoCount, messages: msgCount },
   })
 }

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   accessSchema,
   cagnotteMessageSchema,
-  anecdoteSchema,
+  quizQuestionSchema,
   photoSignSchema,
 } from '@/lib/validators'
 
@@ -25,21 +25,32 @@ describe('accessSchema', () => {
   })
 })
 
-describe('anecdoteSchema', () => {
-  it('rejette une story trop courte', () => {
-    expect(anecdoteSchema.safeParse({ story: 'court' }).success).toBe(false)
+describe('quizQuestionSchema', () => {
+  const ok = {
+    question: 'En quelle année ils se sont rencontrés ?',
+    options: ['2010', '2012', '2015'],
+    correct_index: 1,
+  }
+  it('accepte une question valide', () => {
+    expect(quizQuestionSchema.safeParse(ok).success).toBe(true)
   })
-  it('accepte une story d\'au moins 20 chars', () => {
-    expect(
-      anecdoteSchema.safeParse({ story: 'Une histoire suffisamment longue.' }).success,
-    ).toBe(true)
+  it('rejette une question trop courte', () => {
+    expect(quizQuestionSchema.safeParse({ ...ok, question: 'eh' }).success).toBe(false)
   })
-  it('valide les options "since" autorisées', () => {
+  it('rejette moins de 2 options', () => {
+    expect(quizQuestionSchema.safeParse({ ...ok, options: ['seul'] }).success).toBe(false)
+  })
+  it('rejette plus de 4 options', () => {
     expect(
-      anecdoteSchema.safeParse({ story: 'a'.repeat(30), since: 'la vie' }).success,
-    ).toBe(true)
+      quizQuestionSchema.safeParse({ ...ok, options: ['a', 'b', 'c', 'd', 'e'] }).success,
+    ).toBe(false)
+  })
+  it('rejette correct_index hors options', () => {
+    expect(quizQuestionSchema.safeParse({ ...ok, correct_index: 5 }).success).toBe(false)
+  })
+  it('rejette deux options identiques (même casse)', () => {
     expect(
-      anecdoteSchema.safeParse({ story: 'a'.repeat(30), since: 'jamais' }).success,
+      quizQuestionSchema.safeParse({ ...ok, options: ['Paris', 'paris'] }).success,
     ).toBe(false)
   })
 })

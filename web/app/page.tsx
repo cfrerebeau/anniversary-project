@@ -143,12 +143,11 @@ export default async function HomePage() {
           meta={photoCount > 0 ? `${photoCount} ${photoCount > 1 ? 'photos partagées' : 'photo partagée'}` : null}
         />
         <SecondaryCard
-          href="/anecdotes"
-          iconSrc="/anecdotes.png"
-          iconAlt="Anecdotes"
-          title="Une anecdote à raconter."
-          body="Un truc qu'ils ont dit, fait, ou survécu ensemble."
-          meta={anecdoteCount > 0 ? `${anecdoteCount} ${anecdoteCount > 1 ? 'anecdotes racontées' : 'anecdote racontée'}` : null}
+          href="/quizz"
+          tagColor="bg-gold"
+          abbr="quizz"
+          title="Une question pour le quizz."
+          body="Une histoire d'eux, transformée en question piège pour le jour J."
         />
         {whatsappUrl && (
           <SecondaryCard
