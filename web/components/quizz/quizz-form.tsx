@@ -9,7 +9,7 @@ import { submitQuizz } from '@/app/actions/quizz'
 
 const MIN_OPTIONS = 2
 const MAX_OPTIONS = 4
-const OPTION_PLACEHOLDERS = ['Four', 'Micro-ondes', 'Réfrigérateur', 'Plaque de cuisson']
+const OPTION_PLACEHOLDERS = ['Micro-ondes', 'Four', 'Réfrigérateur', 'Plaque de cuisson']
 
 export function QuizzForm() {
   const [question, setQuestion] = useState('')
