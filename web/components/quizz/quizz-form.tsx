@@ -9,6 +9,7 @@ import { submitQuizz } from '@/app/actions/quizz'
 
 const MIN_OPTIONS = 2
 const MAX_OPTIONS = 4
+const OPTION_PLACEHOLDERS = ['Four', 'Micro-ondes', 'Réfrigérateur', 'Plaque de cuisson']
 
 export function QuizzForm() {
   const [question, setQuestion] = useState('')
@@ -141,7 +142,7 @@ export function QuizzForm() {
                   </button>
                   <input
                     className="ba-input"
-                    placeholder={`Réponse ${i + 1}`}
+                    placeholder={OPTION_PLACEHOLDERS[i] ?? `Réponse ${i + 1}`}
                     value={opt}
                     onChange={(e) => setOption(i, e.target.value)}
                     maxLength={120}
