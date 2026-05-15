@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     ipHash = await getClientIPHash()
   } catch {}
 
-  const rl = await checkRateLimit(`photos:${ipHash}`, 20, 3600)
+  const rl = await checkRateLimit(`photos:${ipHash}`, 1000, 3600)
   if (!rl.allowed) {
     return NextResponse.json({ error: 'rate_limited' }, { status: 429 })
   }
