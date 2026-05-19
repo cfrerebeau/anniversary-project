@@ -58,7 +58,7 @@ export default async function AdminHome() {
           <Stat label="Vus < 24h" value={guestsLast24h.count ?? 0} />
         </div>
 
-        <div className="px-[22px] mt-[14px] grid grid-cols-1 gap-[12px] lg:grid-cols-3">
+        <div className="px-[22px] mt-[14px] grid grid-cols-1 gap-[12px] lg:grid-cols-2">
           <NavCard
             href="/admin/guests"
             abbr="inv."
@@ -83,10 +83,14 @@ export default async function AdminHome() {
             body="Toutes les questions proposées par les complices."
             meta={`${quizzCount.count ?? 0} proposées`}
           />
-        </div>
-
-        <div className="px-[22px] mt-[18px] text-[12px] text-ink-mute font-mono uppercase tracking-[0.12em]">
-          {cagnotteMessagesCount.count ?? 0} messages cagnotte
+          <NavCard
+            href="/admin/messages"
+            abbr="mots"
+            tagColor="bg-ink"
+            title="Messages cagnotte"
+            body="Tous les mots laissés par les complices, exportables en CSV."
+            meta={`${cagnotteMessagesCount.count ?? 0} reçus`}
+          />
         </div>
 
         <div className="h-[40px]" />

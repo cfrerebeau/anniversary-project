@@ -3,9 +3,12 @@ import Link from 'next/link'
 import { requireGuest, getFirstName } from '@/lib/auth'
 import { getServiceClient } from '@/lib/supabase/server'
 import { getCagnotteTotalCents } from '@/lib/cagnotte'
+import { formatEUR } from '@/lib/format'
 import { BAHeader } from '@/components/design/header'
 import { BAPageTitle } from '@/components/design/page-title'
 import { PageContainer } from '@/components/design/page-container'
+import { BACard } from '@/components/design/card'
+import { BAEyebrow } from '@/components/design/eyebrow'
 import { IconArrow } from '@/components/design/icons'
 import { TotalCard } from '@/components/cagnotte/total-card'
 import { IbanCard } from '@/components/cagnotte/iban-card'
@@ -13,17 +16,42 @@ import { MessageForm } from '@/components/cagnotte/message-form'
 
 export const dynamic = 'force-dynamic'
 
+const messageDateFmt = new Intl.DateTimeFormat('fr-FR', {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+})
+
+type MyMessage = {
+  id: string
+  display_name: string | null
+  amount_cents: number | null
+  message: string | null
+  created_at: string
+}
+
 export default async function CagnottePage() {
   const guest = await requireGuest()
   const firstName = getFirstName(guest)
 
   const service = getServiceClient()
-  const [total, { count }] = await Promise.all([
+  const [total, { count }, myMessagesRes] = await Promise.all([
     getCagnotteTotalCents(),
     service
       .from('cagnotte_messages')
       .select('id', { count: 'exact', head: true }),
+    service
+      .from('cagnotte_messages')
+      .select('id, display_name, amount_cents, message, created_at')
+      .eq('guest_id', guest.id)
+      .order('created_at', { ascending: false }),
   ])
+  if (myMessagesRes.error) {
+    console.error('[cagnotte/page:my-messages]', myMessagesRes.error, { guestId: guest.id })
+  }
+  const myMessages = (myMessagesRes.data ?? []) as MyMessage[]
 
   const contributors = count ?? 0
 
@@ -177,6 +205,36 @@ export default async function CagnottePage() {
             <div className="px-[22px] pt-[24px] lg:pt-0">
               <MessageForm defaultName={firstName} />
             </div>
+
+            {myMessages.length > 0 && (
+              <div className="px-[22px] pt-[28px]">
+                <BAEyebrow color="olive">Tes mots</BAEyebrow>
+                <div className="mt-[10px] flex flex-col gap-[10px]">
+                  {myMessages.map((m) => (
+                    <BACard key={m.id} className="p-[16px]">
+                      <div className="flex items-baseline justify-between gap-[10px]">
+                        <div className="text-[14px] font-medium">
+                          {m.display_name ?? '—'}
+                        </div>
+                        {m.amount_cents != null && (
+                          <div className="font-mono text-[12px] text-ink-soft">
+                            {formatEUR(m.amount_cents)}
+                          </div>
+                        )}
+                      </div>
+                      {m.message && (
+                        <div className="text-[14px] text-ink-soft mt-[6px] leading-[1.5] whitespace-pre-wrap">
+                          {m.message}
+                        </div>
+                      )}
+                      <div className="font-mono text-[10px] text-ink-mute tracking-[0.1em] uppercase mt-[8px]">
+                        {messageDateFmt.format(new Date(m.created_at))}
+                      </div>
+                    </BACard>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
