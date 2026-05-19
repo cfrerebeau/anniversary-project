@@ -160,3 +160,47 @@ body {
   outline: 2px solid var(--color-ink);
   outline-offset: 2px;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Diaporama — transitions plein écran (admin)
+   Chaque transition expose une paire `in`/`out` qui s'applique
+   sur les deux calques. `forwards` garde l'état final.
+   ───────────────────────────────────────────────────────────── */
+@keyframes ba-dia-in-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes ba-dia-out-fade {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes ba-dia-in-slide {
+  from { transform: translateX(100%); opacity: 1; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+@keyframes ba-dia-out-slide {
+  from { transform: translateX(0); opacity: 1; }
+  to   { transform: translateX(-100%); opacity: 1; }
+}
+@keyframes ba-dia-in-zoom {
+  from { opacity: 0; transform: scale(1.08); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes ba-dia-out-zoom {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(1.04); }
+}
+@keyframes ba-dia-ken-burns {
+  from { transform: scale(1); }
+  to   { transform: scale(1.08); }
+}
+
+.ba-dia-in-fade  { animation: ba-dia-in-fade  700ms ease-out both; }
+.ba-dia-out-fade { animation: ba-dia-out-fade 700ms ease-out both; }
+.ba-dia-in-slide  { animation: ba-dia-in-slide  700ms ease-out both; }
+.ba-dia-out-slide { animation: ba-dia-out-slide 700ms ease-out both; }
+.ba-dia-in-zoom  { animation: ba-dia-in-zoom  700ms ease-out both; }
+.ba-dia-out-zoom { animation: ba-dia-out-zoom 700ms ease-out both; }
+.ba-dia-in-cut  { opacity: 1; }
+.ba-dia-out-cut { opacity: 0; }
+.ba-dia-ken-burns { animation: ba-dia-ken-burns var(--dia-kb-duration, 5s) linear both; }

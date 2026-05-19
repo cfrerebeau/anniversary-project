@@ -1,6 +1,5 @@
 import { requireAdmin } from '@/lib/auth'
 import { getServiceClient } from '@/lib/supabase/server'
-import { formatEUR } from '@/lib/format'
 import { BAHeader } from '@/components/design/header'
 import { BAPageTitle } from '@/components/design/page-title'
 import { PageContainer } from '@/components/design/page-container'
@@ -11,7 +10,6 @@ export const dynamic = 'force-dynamic'
 type MessageRow = {
   id: string
   display_name: string | null
-  amount_cents: number | null
   message: string | null
   created_at: string
   guests: { email: string; full_name: string | null } | null
@@ -31,9 +29,7 @@ export default async function AdminMessagesPage() {
 
   const { data: rowsRaw, error } = await service
     .from('cagnotte_messages')
-    .select(
-      'id, display_name, amount_cents, message, created_at, guests(email, full_name)',
-    )
+    .select('id, display_name, message, created_at, guests(email, full_name)')
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -69,13 +65,8 @@ export default async function AdminMessagesPage() {
         <div className="px-[22px] flex flex-col gap-[14px]">
           {rows.map((r) => (
             <BACard key={r.id} className="p-[20px]">
-              <div className="flex items-baseline justify-between gap-[12px]">
-                <div className="font-serif text-[20px] leading-[1.15]">
-                  {r.display_name ?? '—'}
-                </div>
-                <div className="font-mono text-[13px] text-ink-soft">
-                  {r.amount_cents != null ? formatEUR(r.amount_cents) : 'Montant non indiqué'}
-                </div>
+              <div className="font-serif text-[20px] leading-[1.15]">
+                {r.display_name ?? '—'}
               </div>
 
               {r.message && (

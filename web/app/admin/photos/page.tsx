@@ -4,6 +4,9 @@ import { BAHeader } from '@/components/design/header'
 import { BAPageTitle } from '@/components/design/page-title'
 import { PageContainer } from '@/components/design/page-container'
 import { BACard } from '@/components/design/card'
+import { PhotosDiaporama } from '@/components/admin/photos-diaporama'
+import type { PhotoLite } from '@/components/admin/photos-diaporama.helpers'
+import { nowMs } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,6 +67,22 @@ export default async function AdminPhotosPage() {
     }
   }
 
+  const urlIssuedAt = nowMs()
+  const photosLite: PhotoLite[] = photos
+    .map((p) => {
+      const url = signedUrls.get(`${p.storage_bucket}/${p.storage_path}`)
+      if (!url) return null
+      return {
+        id: p.id,
+        url,
+        urlIssuedAt,
+        caption: p.caption,
+        contentType: p.content_type,
+        uploaderName: p.uploader_name,
+      }
+    })
+    .filter((p): p is PhotoLite => p !== null)
+
   return (
     <PageContainer width="wide">
       <div className="min-h-screen pt-[54px]">
@@ -74,6 +93,8 @@ export default async function AdminPhotosPage() {
           italicWord="partagé"
           sub={`${photos.length} fichier${photos.length > 1 ? 's' : ''} dans le bucket privé. URLs signées valables ${Math.round(SIGNED_URL_TTL / 60)} min.`}
         />
+
+        <PhotosDiaporama photos={photosLite} />
 
         <div className="px-[22px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[14px]">
           {photos.map((p) => {

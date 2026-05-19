@@ -28,3 +28,11 @@ export function daysUntil(targetISO: string): number {
 export function isoSecondsAgo(seconds: number): string {
   return new Date(Date.now() - seconds * 1000).toISOString()
 }
+
+/**
+ * Renvoie le timestamp ms actuel. Même wrapper que `isoSecondsAgo` pour
+ * contourner react-hooks/purity côté server components.
+ */
+export function nowMs(): number {
+  return Date.now()
+}

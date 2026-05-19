@@ -7,7 +7,6 @@ export const dynamic = 'force-dynamic'
 type ExportRow = {
   created_at: string
   display_name: string | null
-  amount_cents: number | null
   message: string | null
   guests: { email: string; full_name: string | null } | null
 }
@@ -20,7 +19,7 @@ export async function GET() {
   const service = getServiceClient()
   const { data, error } = await service
     .from('cagnotte_messages')
-    .select('created_at, display_name, amount_cents, message, guests(email, full_name)')
+    .select('created_at, display_name, message, guests(email, full_name)')
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -35,7 +34,6 @@ export async function GET() {
     'display_name',
     'guest_email',
     'guest_full_name',
-    'amount_eur',
     'message',
   ])
 
@@ -45,7 +43,6 @@ export async function GET() {
       r.display_name,
       r.guests?.email ?? null,
       r.guests?.full_name ?? null,
-      r.amount_cents != null ? (r.amount_cents / 100).toFixed(2) : null,
       r.message,
     ]),
   )

@@ -25,6 +25,7 @@
 # Claude memory / plans (project-local, hors du repo)
 .claude/projects
 .claude/plans
+.claude/scheduled_tasks.lock
 
 # Build outputs (Next.js, etc.)
 **/node_modules
