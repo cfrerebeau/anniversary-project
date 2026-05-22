@@ -3,7 +3,7 @@ import { getServiceClient } from '@/lib/supabase/server'
 import { BAHeader } from '@/components/design/header'
 import { BAPageTitle } from '@/components/design/page-title'
 import { PageContainer } from '@/components/design/page-container'
-import { BACard } from '@/components/design/card'
+import { QuizzCard } from '@/components/quizz/quizz-card'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,13 +29,16 @@ export default async function AdminQuizzPage() {
   await requireAdmin()
   const service = getServiceClient()
 
-  const { data: rowsRaw } = await service
+  const { data: rowsRaw, error: queryErr } = await service
     .from('quizz')
     .select(
       'id, uploader_name, question_text, options, correct_index, created_at, guests(email, full_name)',
     )
     .order('created_at', { ascending: false })
 
+  if (queryErr) {
+    console.error('[admin/quizz:query]', queryErr)
+  }
   const rows = (rowsRaw ?? []) as unknown as QuizzRow[]
 
   return (
@@ -51,38 +54,17 @@ export default async function AdminQuizzPage() {
 
         <div className="px-[22px] flex flex-col gap-[14px]">
           {rows.map((q) => (
-            <BACard key={q.id} className="p-[20px]">
-              <div className="font-serif text-[22px] leading-[1.15]">
-                <em className="italic">« {q.question_text} »</em>
-              </div>
-
-              <ul className="mt-[12px] flex flex-col gap-[6px]">
-                {q.options.map((opt, i) => (
-                  <li
-                    key={i}
-                    className={`text-[14px] leading-[1.5] flex items-center gap-[8px] ${
-                      i === q.correct_index ? 'text-olive font-semibold' : 'text-ink-soft'
-                    }`}
-                  >
-                    <span
-                      className="font-mono text-[10px] tracking-[0.12em] uppercase"
-                      aria-hidden
-                    >
-                      {i === q.correct_index ? '✓' : '·'}
-                    </span>
-                    <span>{opt}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-[12px] pt-[10px] border-t border-paper-edge text-[12px] text-ink-soft flex flex-wrap gap-x-[10px] gap-y-[2px]">
-                <span>{q.uploader_name ?? q.guests?.full_name ?? '—'}</span>
-                {q.guests?.email && <span className="text-ink-mute">· {q.guests.email}</span>}
-                <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-ink-mute ml-auto">
-                  {dateFmt.format(new Date(q.created_at))}
-                </span>
-              </div>
-            </BACard>
+            <QuizzCard
+              key={q.id}
+              id={q.id}
+              question={q.question_text}
+              options={q.options}
+              correctIndex={q.correct_index}
+              uploaderName={q.uploader_name ?? q.guests?.full_name ?? null}
+              uploaderEmail={q.guests?.email ?? null}
+              createdAtLabel={dateFmt.format(new Date(q.created_at))}
+              variant="admin"
+            />
           ))}
           {rows.length === 0 && (
             <div className="text-center text-ink-mute py-[40px]">
