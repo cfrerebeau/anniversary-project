@@ -132,10 +132,14 @@ public class QuizHub : Hub
                 p.Id, p.Pseudo, p.Score, p.LastQuestionGain, p.CurrentAnswer
             })
         });
+        var ranking = _game.GetLeaderboard(10)
+            .Select((p, i) => new { rank = i + 1, p.Pseudo, p.Score, p.LastQuestionGain })
+            .ToList();
         await Clients.Group("display").SendAsync("answerRevealed", new
         {
             correctIndex = q.CorrectIndex,
-            counts
+            counts,
+            ranking
         });
         foreach (var p in _game.Players.Values)
         {

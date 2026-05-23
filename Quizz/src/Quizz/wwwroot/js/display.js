@@ -110,7 +110,27 @@ conn.on('answerRevealed', d => {
     span.textContent = c;
     el.appendChild(span);
   });
+  if (d.ranking && d.ranking.length) showRevealRanking(d.ranking);
 });
+
+function showRevealRanking(ranking) {
+  document.querySelectorAll('.reveal-ranking').forEach(n => n.remove());
+  const items = ranking.map((p, i) => `
+    <li class="rank-${p.rank}" style="animation-delay:${i * 80}ms">
+      <span class="rank">${p.rank}</span>
+      <span class="name">${escapeHtml(p.pseudo)}</span>
+      <span class="score">${p.score} pts</span>
+      ${p.lastQuestionGain ? `<span class="gain">+${p.lastQuestionGain}</span>` : ''}
+    </li>
+  `).join('');
+  const panel = document.createElement('div');
+  panel.className = 'reveal-ranking';
+  panel.innerHTML = `
+    <h2>Top ${ranking.length}</h2>
+    <ol class="ranking-list">${items}</ol>
+  `;
+  content.appendChild(panel);
+}
 
 conn.on('leaderboard', top => {
   render(`
