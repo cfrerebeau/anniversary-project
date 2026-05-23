@@ -8,6 +8,7 @@ let players = [];
 let currentPhase = 'Lobby';
 let title = 'Quiz';
 let joinUrl = '';
+let prevAnswered = 0;
 
 function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 function render(html) { content.innerHTML = html; }
@@ -27,13 +28,16 @@ function renderLobby() {
   const qrSrc = '/api/qrcode';
   render(`
     <h1>${escapeHtml(title)}</h1>
+    <p class="lobby-cta">Connecte toi au Wifi, puis scanne le QR code</p>
+    <div class="wifi-info">
+      <p class="wifi-label">WiFi</p>
+      <p>Réseau : <strong>PetitesBrosses</strong></p>
+      <p>Mot de passe : <strong>PetiteBrosses</strong></p>
+    </div>
     <div class="lobby-join">
       <img class="qr" src="${qrSrc}" alt="QR code pour rejoindre" />
-      <div class="lobby-instructions">
-        <p>Scanne le QR code</p>
-        <p class="muted">ou ouvre <strong>${escapeHtml(joinUrl)}</strong></p>
-      </div>
     </div>
+    <p class="lobby-url muted">ou ouvre <strong>${escapeHtml(joinUrl)}</strong></p>
     <h2>${players.length} joueur${players.length > 1 ? 's' : ''}</h2>
     <div class="player-grid">
       ${players.map(p => `<div class="player-bubble">${escapeHtml(p.pseudo)}</div>`).join('')}
@@ -52,6 +56,7 @@ conn.on('phaseChanged', phase => {
 });
 
 conn.on('questionStarted', q => {
+  prevAnswered = 0;
   const colsClass = q.options.length === 1 ? 'cols-1' : q.options.length === 3 ? 'cols-3' : '';
   render(`
     <div class="question-meta">Question ${q.index + 1} / ${q.total}</div>
@@ -73,8 +78,23 @@ conn.on('questionStarted', q => {
 
 conn.on('answerCount', d => {
   const el = document.getElementById('answer-count');
-  if (el) el.textContent = `${d.answered} / ${d.total} réponses`;
+  if (!el) return;
+  el.textContent = `${d.answered} / ${d.total} réponses`;
+  const delta = d.answered - prevAnswered;
+  prevAnswered = d.answered;
+  if (delta > 0) flashAnswer(el, delta);
 });
+
+function flashAnswer(el, delta) {
+  el.classList.remove('bump');
+  void el.offsetWidth;
+  el.classList.add('bump');
+  const pop = document.createElement('span');
+  pop.className = 'answer-pop';
+  pop.textContent = delta > 1 ? `+${delta}` : '+1';
+  el.appendChild(pop);
+  setTimeout(() => pop.remove(), 1100);
+}
 
 conn.on('answerRevealed', d => {
   const opts = document.querySelectorAll('.big-option');
