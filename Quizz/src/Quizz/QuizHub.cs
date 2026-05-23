@@ -41,7 +41,8 @@ public class QuizHub : Hub
         if (playerId == null) return;
         _game.SubmitAnswer(playerId, answerIndex);
         await Clients.Caller.SendAsync("answerAccepted");
-        await BroadcastAnswerCount();
+        var pseudo = _game.Players.TryGetValue(playerId, out var p) ? p.Pseudo : null;
+        await BroadcastAnswerCount(pseudo);
     }
 
     public async Task NextQuestion()
@@ -94,9 +95,9 @@ public class QuizHub : Hub
         await Clients.Group("display").SendAsync("playerList", data);
     }
 
-    private async Task BroadcastAnswerCount()
+    private async Task BroadcastAnswerCount(string? pseudo = null)
     {
-        var payload = new { answered = _game.CountAnswered(), total = _game.Players.Count };
+        var payload = new { answered = _game.CountAnswered(), total = _game.Players.Count, pseudo };
         await Clients.Group("host").SendAsync("answerCount", payload);
         await Clients.Group("display").SendAsync("answerCount", payload);
     }

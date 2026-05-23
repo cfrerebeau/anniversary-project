@@ -82,18 +82,21 @@ conn.on('answerCount', d => {
   el.textContent = `${d.answered} / ${d.total} réponses`;
   const delta = d.answered - prevAnswered;
   prevAnswered = d.answered;
-  if (delta > 0) flashAnswer(el, delta);
+  if (delta > 0) flashAnswer(el, delta, d.pseudo);
 });
 
-function flashAnswer(el, delta) {
+function flashAnswer(el, delta, pseudo) {
   el.classList.remove('bump');
   void el.offsetWidth;
   el.classList.add('bump');
   const pop = document.createElement('span');
   pop.className = 'answer-pop';
-  pop.textContent = delta > 1 ? `+${delta}` : '+1';
+  const plus = delta > 1 ? `+${delta}` : '+1';
+  pop.innerHTML = pseudo
+    ? `<span class="pop-name">${escapeHtml(pseudo)}</span> <span class="pop-plus">${plus}</span>`
+    : `<span class="pop-plus">${plus}</span>`;
   el.appendChild(pop);
-  setTimeout(() => pop.remove(), 1100);
+  setTimeout(() => pop.remove(), 1400);
 }
 
 conn.on('answerRevealed', d => {
