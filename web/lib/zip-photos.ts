@@ -216,3 +216,31 @@ export function makeUniqueFilename(
 
   return folderPrefix ? `${folderPrefix}/${name}` : name
 }
+
+/**
+ * Nom de fichier stable pour un download individuel — dérivé de `photo.id`
+ * (préfixe 8 chars du UUID) plutôt que d'un index, pour que la même photo
+ * ait toujours le même nom indépendamment du tri ou des autres rows.
+ * Pas de gestion de collision : `photo.id` est unique par contrat DB.
+ */
+export function makeIndividualFilename(photo: {
+  id: string
+  caption: string | null
+  storage_path: string
+  content_type: string | null
+}): string {
+  let slug = (photo.caption || 'photo')
+    .normalize('NFD')
+    .replace(/\p{Mn}+/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40)
+  if (!slug) slug = 'photo'
+  if (RESERVED_WIN_NAMES.test(slug)) slug = `f-${slug}`
+
+  const ext = extFromMime(photo.content_type) ?? extFromPath(photo.storage_path) ?? 'bin'
+  const idPrefix = photo.id.replace(/-/g, '').slice(0, 8) || 'id'
+  return `${slug}-${idPrefix}.${ext}`
+}
+

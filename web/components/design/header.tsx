@@ -1,7 +1,15 @@
 import Link from 'next/link'
 import { IconBack } from './icons'
 
-export function BAHeader({ backHref = '/', label = 'accueil' }: { backHref?: string; label?: string }) {
+export function BAHeader({
+  backHref = '/',
+  label = 'accueil',
+  hideBrand = false,
+}: {
+  backHref?: string
+  label?: string
+  hideBrand?: boolean
+}) {
   return (
     <div className="flex items-center justify-between px-[18px] pt-[8px] pb-[4px] min-h-[44px]">
       <Link
@@ -12,10 +20,14 @@ export function BAHeader({ backHref = '/', label = 'accueil' }: { backHref?: str
         <IconBack size={16} />
         <span className="text-[14px]">{label}</span>
       </Link>
-      <div className="font-mono text-[10px] tracking-[0.18em] text-ink-mute uppercase">
-        🤫 entre nous
-      </div>
-      <div className="w-[60px]" aria-hidden />
+      {hideBrand ? null : (
+        <>
+          <div className="font-mono text-[10px] tracking-[0.18em] text-ink-mute uppercase">
+            🤫 entre nous
+          </div>
+          <div className="w-[60px]" aria-hidden />
+        </>
+      )}
     </div>
   )
 }
