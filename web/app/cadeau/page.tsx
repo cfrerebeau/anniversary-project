@@ -12,10 +12,8 @@ import { InviteShareCard } from '@/components/cadeau/invite-share-card'
 import { getInviteExpiresAtISO } from '@/lib/invite'
 import { PhotosDiaporama } from '@/components/admin/photos-diaporama'
 import type { PhotoLite } from '@/components/admin/photos-diaporama.helpers'
-import {
-  inspectCadeauAccess,
-  applyCookieAndRedirect,
-} from '@/lib/cadeau-auth'
+import { redirect } from 'next/navigation'
+import { inspectCadeauAccess } from '@/lib/cadeau-auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -60,10 +58,17 @@ export default async function CadeauPage({
 }) {
   const sp = await searchParams
   const token = parseToken(sp.token)
-  const auth = await inspectCadeauAccess(token, 'page')
 
-  if (auth.kind === 'set-cookie-and-redirect') {
-    await applyCookieAndRedirect(auth.redirectTo)
+  // Next 16 : un Server Component ne peut pas mettre de cookie. On délègue
+  // l'échange token → cookie à un route handler dédié.
+  if (token != null) {
+    redirect(`/api/cadeau/exchange?token=${encodeURIComponent(token)}`)
+  }
+
+  // En mode 'page', inspectCadeauAccess fait redirect('/') sur deny ;
+  // ce qui revient ici ne peut être que { kind: 'admin' | 'cookie' }.
+  const auth = (await inspectCadeauAccess(undefined, 'page')) as {
+    kind: 'admin' | 'cookie'
   }
 
   const service = getServiceClient()
