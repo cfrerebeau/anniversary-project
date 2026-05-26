@@ -39,10 +39,16 @@ export const quizQuestionSchema = z
     path: ['options'],
   })
 
+export const photoBucketKeySchema = z.enum(['souvenirs', 'event'])
+
+// Pas de cap dans `photoSignSchema` : la limite est par-bucket et appliquée
+// dans la route après lecture de `bucket`. Si on cappait ici on rejetterait
+// faussement les vidéos event > 50 MB.
 export const photoSignSchema = z.object({
   filename: z.string().min(1).max(200),
   content_type: z.string().regex(/^(image|video)\//),
-  size_bytes: z.number().int().positive().max(50 * 1024 * 1024),
+  size_bytes: z.number().int().positive().max(200 * 1024 * 1024),
+  bucket: photoBucketKeySchema,
 })
 
 export const photoProcessSchema = z.object({
@@ -50,4 +56,7 @@ export const photoProcessSchema = z.object({
   caption: z.string().trim().max(280).optional().default(''),
   content_type: z.string().min(1),
   size_bytes: z.number().int().positive(),
+  bucket: photoBucketKeySchema,
+  upload_nonce: z.string().regex(/^[a-f0-9]{64}$/),
+  upload_nonce_exp: z.number().int().positive(),
 })

@@ -9,9 +9,18 @@ type Props = {
   url: string | null
   caption: string
   contentType: string | null
+  uploaderName?: string | null
+  isOwner?: boolean
 }
 
-export function PhotoCard({ id, url, caption, contentType }: Props) {
+export function PhotoCard({
+  id,
+  url,
+  caption,
+  contentType,
+  uploaderName,
+  isOwner = true,
+}: Props) {
   const router = useRouter()
   const [draft, setDraft] = useState(caption)
   const [error, setError] = useState<string | null>(null)
@@ -98,41 +107,54 @@ export function PhotoCard({ id, url, caption, contentType }: Props) {
         )}
       </div>
       <div className="p-[14px]">
-        <label
-          htmlFor={captionInputId}
-          className="block text-[11px] text-ink-mute mb-[2px] leading-[1.3]"
-        >
-          Légende — <em className="italic">quand</em>, <em className="italic">où</em>, qui ?
-        </label>
-        <input
-          id={captionInputId}
-          type="text"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onBlur={() => void commitCaption()}
-          maxLength={280}
-          placeholder="ex. été 2019, à Lisbonne"
-          disabled={isDeleting}
-          className="w-full bg-transparent outline-none text-[14px] text-ink py-[4px]"
-          style={{ borderBottom: '1px dashed var(--color-paper-edge)' }}
-        />
-        <div className="flex items-center justify-between mt-[10px]">
-          {error ? (
-            <div role="alert" className="text-[11px] text-stamp-deep">
-              {error}
+        {isOwner ? (
+          <>
+            <label
+              htmlFor={captionInputId}
+              className="block text-[11px] text-ink-mute mb-[2px] leading-[1.3]"
+            >
+              Légende — <em className="italic">quand</em>, <em className="italic">où</em>, qui ?
+            </label>
+            <input
+              id={captionInputId}
+              type="text"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={() => void commitCaption()}
+              maxLength={280}
+              placeholder="ex. été 2019, à Lisbonne"
+              disabled={isDeleting}
+              className="w-full bg-transparent outline-none text-[14px] text-ink py-[4px]"
+              style={{ borderBottom: '1px dashed var(--color-paper-edge)' }}
+            />
+            <div className="flex items-center justify-between mt-[10px]">
+              {error ? (
+                <div role="alert" className="text-[11px] text-stamp-deep">
+                  {error}
+                </div>
+              ) : (
+                <span />
+              )}
+              <button
+                type="button"
+                onClick={onDeleteClick}
+                disabled={isDeleting}
+                className="ba-btn bg-transparent text-ink-mute p-[4px] text-[12px] underline underline-offset-[3px] hover:text-stamp-deep disabled:opacity-50"
+              >
+                {isDeleting ? 'suppression…' : 'supprimer'}
+              </button>
             </div>
-          ) : (
-            <span />
-          )}
-          <button
-            type="button"
-            onClick={onDeleteClick}
-            disabled={isDeleting}
-            className="ba-btn bg-transparent text-ink-mute p-[4px] text-[12px] underline underline-offset-[3px] hover:text-stamp-deep disabled:opacity-50"
-          >
-            {isDeleting ? 'suppression…' : 'supprimer'}
-          </button>
-        </div>
+          </>
+        ) : (
+          <>
+            {caption && (
+              <div className="text-[14px] leading-[1.4] mb-[6px]">{caption}</div>
+            )}
+            {uploaderName && (
+              <div className="text-[12px] text-ink-soft">{uploaderName}</div>
+            )}
+          </>
+        )}
       </div>
     </BACard>
   )

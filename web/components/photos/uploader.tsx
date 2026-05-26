@@ -7,7 +7,15 @@ import { BACard } from '@/components/design/card'
 import { BAEyebrow } from '@/components/design/eyebrow'
 import { IconCheck, IconUpload } from '@/components/design/icons'
 
-const MAX_BYTES = 50 * 1024 * 1024
+type BucketKey = 'souvenirs' | 'event'
+const BUCKET_MAX_BYTES: Record<BucketKey, number> = {
+  souvenirs: 50 * 1024 * 1024,
+  event: 100 * 1024 * 1024,
+}
+const BUCKET_MAX_LABEL: Record<BucketKey, string> = {
+  souvenirs: '50 Mo',
+  event: '100 Mo',
+}
 const PALETTE = ['#9DA989', '#C7956D', '#7B8AA1', '#A6927A', '#8E9485', '#B98E72']
 
 type Item = {
@@ -23,12 +31,18 @@ type Item = {
 
 let nextItemId = 1
 
-export function PhotosUploader() {
+export function PhotosUploader({
+  bucket = 'souvenirs',
+}: {
+  bucket?: BucketKey
+}) {
   const [items, setItems] = useState<Item[]>([])
   const [active, setActive] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+  const maxBytes = BUCKET_MAX_BYTES[bucket]
+  const maxLabel = BUCKET_MAX_LABEL[bucket]
   // Debounce des refresh : un upload multi-fichiers (10 photos en parallèle)
   // déclencherait sinon 10 re-fetches du RSC `/photos`. On regroupe en un
   // seul refresh quand la file est calme depuis 400 ms.
@@ -41,12 +55,30 @@ export function PhotosUploader() {
     }, 400)
   }
 
+  // File d'attente avec concurrence bornée. Un user qui sélectionne 100
+  // photos sur son iPhone ne doit pas faire exploser le connection pool du
+  // browser ni saturer le rate-limit `photos:` à 1000/h sur un seul flush.
+  const MAX_CONCURRENT = 4
+  const queueRef = useRef<Array<() => Promise<void>>>([])
+  const inFlightRef = useRef(0)
+  function pumpQueue() {
+    while (inFlightRef.current < MAX_CONCURRENT && queueRef.current.length > 0) {
+      const job = queueRef.current.shift()
+      if (!job) break
+      inFlightRef.current += 1
+      void job().finally(() => {
+        inFlightRef.current -= 1
+        pumpQueue()
+      })
+    }
+  }
+
   function addFiles(fileList: FileList | null) {
     if (!fileList || !fileList.length) return
     const newItems: Item[] = []
     let oversize = false
     for (const file of Array.from(fileList)) {
-      if (file.size > MAX_BYTES) {
+      if (file.size > maxBytes) {
         oversize = true
         continue
       }
@@ -59,14 +91,15 @@ export function PhotosUploader() {
         progress: 0,
         caption: '',
       })
-      void uploadOne(id, file)
+      queueRef.current.push(() => uploadOne(id, file))
     }
     if (oversize) {
-      setError("Y'en a un qui fait sa diva (>50 Mo). Réessaie ou prends-en un plus léger.")
+      setError(`Y'en a un qui fait sa diva (>${maxLabel}). Réessaie ou prends-en un plus léger.`)
     } else {
       setError(null)
     }
     setItems((prev) => [...prev, ...newItems])
+    pumpQueue()
   }
 
   async function uploadOne(itemId: string, file: File) {
@@ -79,6 +112,7 @@ export function PhotosUploader() {
           filename: file.name,
           content_type: file.type || 'application/octet-stream',
           size_bytes: file.size,
+          bucket,
         }),
       })
       if (!signRes.ok) {
@@ -93,9 +127,12 @@ export function PhotosUploader() {
       const sign = (await signRes.json()) as {
         signed_url: string
         path: string
-        bucket: string
+        bucket: BucketKey
+        bucket_id: string
         token: string
         content_type: string
+        upload_nonce: string
+        upload_nonce_exp: number
       }
 
       // 2. PUT direct vers Supabase Storage avec progress (XHR)
@@ -117,6 +154,9 @@ export function PhotosUploader() {
           caption: '',
           content_type: file.type || 'application/octet-stream',
           size_bytes: file.size,
+          bucket: sign.bucket,
+          upload_nonce: sign.upload_nonce,
+          upload_nonce_exp: sign.upload_nonce_exp,
         }),
       })
       if (!procRes.ok) {
@@ -203,7 +243,7 @@ export function PhotosUploader() {
           <div className="text-[13px] text-ink-soft mt-[6px] leading-[1.45]">
             Ou{' '}
             <span className="underline underline-offset-[2px]">fouille dans ton téléphone</span>.
-            JPEG, HEIC, PNG, vidéos. Jusqu&apos;à 50 Mo l&apos;unité.
+            JPEG, HEIC, PNG, vidéos. Jusqu&apos;à {maxLabel} l&apos;unité.
           </div>
           <input
             ref={inputRef}

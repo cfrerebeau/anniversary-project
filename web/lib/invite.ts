@@ -1,9 +1,20 @@
 import { createHash, timingSafeEqual } from 'node:crypto'
 
-// Le lien global expire à la fin du 25 mai 2026 (heure de Paris). Au-delà,
-// l'inscription via /invite/[slug] est fermée — il reste /access (lien magique
-// par email) pour les invités déjà connus.
-const INVITE_EXPIRES_AT_MS = new Date('2026-05-25T23:59:59+02:00').getTime()
+// Expiry du lien global /invite/[slug]. Editable via env var INVITE_EXPIRES_AT
+// (ISO 8601, e.g. "2026-08-31T23:59:59+02:00") pour rotation post-mariage sans
+// redeploy. Fallback : ~3 mois après le mariage (2026-08-31 Paris).
+const FALLBACK_EXPIRES_AT = '2026-08-31T23:59:59+02:00'
+
+function resolveExpiresAtMs(): number {
+  const raw = process.env.INVITE_EXPIRES_AT
+  if (raw) {
+    const parsed = new Date(raw).getTime()
+    if (Number.isFinite(parsed)) return parsed
+    console.warn('[invite] INVITE_EXPIRES_AT invalide, fallback', { raw })
+  }
+  return new Date(FALLBACK_EXPIRES_AT).getTime()
+}
+
 // Cap arbitraire pour éviter qu'un client envoie un slug géant (DoS Buffer).
 const MAX_SLUG_INPUT = 200
 
@@ -17,6 +28,10 @@ export function checkInviteSlug(input: string): InviteCheck {
   const a = createHash('sha256').update(input).digest()
   const b = createHash('sha256').update(expected).digest()
   if (!timingSafeEqual(a, b)) return 'wrong_slug'
-  if (Date.now() > INVITE_EXPIRES_AT_MS) return 'expired'
+  if (Date.now() > resolveExpiresAtMs()) return 'expired'
   return 'ok'
+}
+
+export function getInviteExpiresAtISO(): string {
+  return new Date(resolveExpiresAtMs()).toISOString()
 }

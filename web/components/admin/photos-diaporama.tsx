@@ -17,7 +17,7 @@ import {
 import { BAPrimary, BASecondary } from '@/components/design/buttons'
 import {
   DEFAULT_CONFIG,
-  SESSION_STORAGE_KEY,
+  SESSION_STORAGE_KEY as DEFAULT_SESSION_KEY,
   TRANSITION_DURATION_MS,
   URL_REFRESH_AT_MS,
   clampConfig,
@@ -43,7 +43,15 @@ type PlayState = {
 
 type UrlOverride = { url: string; issuedAt: number }
 
-export function PhotosDiaporama({ photos }: { photos: PhotoLite[] }) {
+export function PhotosDiaporama({
+  photos,
+  storageKey = DEFAULT_SESSION_KEY,
+  refreshEndpoint = '/api/admin/photos/sign',
+}: {
+  photos: PhotoLite[]
+  storageKey?: string
+  refreshEndpoint?: string
+}) {
   const [phase, setPhase] = useState<Phase>('idle')
   const [snapshot, setSnapshot] = useState<ResumeSnapshot | null>(null)
   const [playState, setPlayState] = useState<PlayState | null>(null)
@@ -66,19 +74,21 @@ export function PhotosDiaporama({ photos }: { photos: PhotoLite[] }) {
   useEffect(() => {
     if (typeof window === 'undefined') return
     try {
-      const raw = window.sessionStorage.getItem(SESSION_STORAGE_KEY)
-      if (!raw) return
+      const raw = window.sessionStorage.getItem(storageKey)
+      // Lecture one-shot d'une API externe (sessionStorage) au montage. Quand
+      // storageKey change, on reset le snapshot précédent.
+      if (!raw) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setSnapshot(null)
+        return
+      }
       const parsed = JSON.parse(raw) as ResumeSnapshot
       if (!parsed.order || !parsed.currentPhotoId) return
-      // Lecture one-shot d'une API externe (sessionStorage) au montage : la
-      // règle react-hooks/set-state-in-effect ne propose pas d'idiome plus
-      // propre que useSyncExternalStore, surdimensionné ici.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSnapshot(parsed)
     } catch {
       // snapshot corrompu : on ignore
     }
-  }, [])
+  }, [storageKey])
 
   const photoIds = useMemo(() => new Set(livePhotos.map((p) => p.id)), [livePhotos])
   const resumePoint = useMemo(
@@ -88,21 +98,24 @@ export function PhotosDiaporama({ photos }: { photos: PhotoLite[] }) {
 
   const clearSnapshot = useCallback(() => {
     try {
-      window.sessionStorage.removeItem(SESSION_STORAGE_KEY)
+      window.sessionStorage.removeItem(storageKey)
     } catch {
       // sessionStorage indisponible : on ignore
     }
     setSnapshot(null)
-  }, [])
+  }, [storageKey])
 
-  const writeSnapshot = useCallback((snap: ResumeSnapshot) => {
-    try {
-      window.sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(snap))
-    } catch {
-      // ignore
-    }
-    setSnapshot(snap)
-  }, [])
+  const writeSnapshot = useCallback(
+    (snap: ResumeSnapshot) => {
+      try {
+        window.sessionStorage.setItem(storageKey, JSON.stringify(snap))
+      } catch {
+        // ignore
+      }
+      setSnapshot(snap)
+    },
+    [storageKey],
+  )
 
   function startFresh(config: DiaporamaConfig) {
     if (livePhotos.length === 0) return
@@ -160,6 +173,8 @@ export function PhotosDiaporama({ photos }: { photos: PhotoLite[] }) {
           order={playState.order}
           startIndex={playState.index}
           config={playState.config}
+          storageKey={storageKey}
+          refreshEndpoint={refreshEndpoint}
           onExit={exitPlayer}
           onPhotosRefreshed={(updates) => {
             // Bail si rien à appliquer (photo supprimée côté DB → l'API omet
@@ -400,6 +415,8 @@ function Player({
   order,
   startIndex,
   config,
+  storageKey,
+  refreshEndpoint,
   onExit,
   onPhotosRefreshed,
 }: {
@@ -407,6 +424,8 @@ function Player({
   order: string[]
   startIndex: number
   config: DiaporamaConfig
+  storageKey: string
+  refreshEndpoint: string
   onExit: (snapshot: ResumeSnapshot | null) => void
   onPhotosRefreshed: (updates: RefreshUpdate) => void
 }) {
@@ -695,7 +714,7 @@ function Player({
       const snap = buildSnapshot()
       if (snap) {
         try {
-          window.sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(snap))
+          window.sessionStorage.setItem(storageKey, JSON.stringify(snap))
         } catch {
           // ignore
         }
@@ -703,7 +722,7 @@ function Player({
     }
     window.addEventListener('pagehide', onPageHide)
     return () => window.removeEventListener('pagehide', onPageHide)
-  }, [buildSnapshot])
+  }, [buildSnapshot, storageKey])
 
   // ── Refresh des URLs signées avant expiration ─────────────────────────────
   const refreshInflight = useRef(false)
@@ -721,7 +740,7 @@ function Player({
     if (idsToCheck.length === 0) return
     refreshInflight.current = true
     try {
-      const res = await fetch('/api/admin/photos/sign', {
+      const res = await fetch(refreshEndpoint, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ ids: idsToCheck }),
@@ -734,7 +753,7 @@ function Player({
     } finally {
       refreshInflight.current = false
     }
-  }, [order, index, getPhoto, onPhotosRefreshed])
+  }, [order, index, getPhoto, onPhotosRefreshed, refreshEndpoint])
 
   useEffect(() => {
     void refreshUpcomingIfStale()

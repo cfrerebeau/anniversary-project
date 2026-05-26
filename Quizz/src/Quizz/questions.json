@@ -1,27 +1,157 @@
 {
-  "title": "20 ans de Mariage ;-)",
+  "title": "Brice & Alix — le quiz",
   "defaultTimeLimit": 20,
   "questions": [
     {
-      "text": "Quelle est la capitale de la France ?",
-      "options": ["Paris", "Lyon", "Marseille", "Bordeaux"],
-      "correctIndex": 0
+      "text": "Quel etait la couleur du manteau de Brice quand il se sont rencontré",
+      "options": [
+        "Rouge",
+        "C'est un piège, multicolore",
+        "Vert",
+        "Noir"
+      ],
+      "correctIndex": 2,
+      "uploaderName": "Christophe Frerebeau"
     },
     {
-      "text": "Combien y a-t-il de continents sur Terre ?",
-      "options": ["5", "6", "7"],
-      "correctIndex": 2
+      "text": "Quel était le cadeau offert par Brice et Alix aux invités de leur mariage ?",
+      "options": [
+        "Une mug",
+        "Un porte couteau",
+        "Un cendrier",
+        "Un pot de confiture"
+      ],
+      "correctIndex": 2,
+      "uploaderName": "Louis"
     },
     {
-      "text": "Le soleil est-il une étoile ?",
-      "options": ["Oui", "Non"],
+      "text": "De quelle façon Brice a t-il l'habitude d'attacher son pull?",
+      "options": [
+        "A la taille, comme tout le monde",
+        "Sur les épaules, l'élégance naturelle",
+        "En diagonal, pour le style"
+      ],
+      "correctIndex": 2,
+      "uploaderName": "Alexia"
+    },
+    {
+      "text": "Qui le joueur le plus épatant au blanc-manger- coco ?",
+      "options": [
+        "Brice",
+        "Alix"
+      ],
+      "correctIndex": 1,
+      "uploaderName": "Angele"
+    },
+    {
+      "text": "Qui dit : \" sur une échelle de 1 à 10, tu en es où au niveau bonheur\" ?",
+      "options": [
+        "Brice",
+        "Alix"
+      ],
       "correctIndex": 0,
-      "timeLimit": 10
+      "uploaderName": "Angele"
     },
     {
-      "text": "Quel langage est utilisé pour ce projet ?",
-      "options": ["Java", "C#", "Python", "Go"],
-      "correctIndex": 1
+      "text": "Où dorment Alix, Brice, Clément. Garance, Étienne et Gonzague le soir du 31 décembre ?",
+      "options": [
+        "Dans un hôtel 5 étoiles ?",
+        "Chez des copains ?"
+      ],
+      "correctIndex": 0,
+      "uploaderName": "Angele"
+    },
+    {
+      "text": "Où dorment Alix, Brice, Clément, Garance, Étienne et Gonzague le soir du 31 décembre ?",
+      "options": [
+        "Dans un hôtel 5 etoiles",
+        "Chez des amis",
+        "Tous ensemble dans leur salon",
+        "Dans la maison de retraite de Alix"
+      ],
+      "correctIndex": 2,
+      "uploaderName": "Angele"
+    },
+    {
+      "text": "Que ne trouve-t-on pas dans la cuisine de brice et alix?",
+      "options": [
+        "Micro-ondes",
+        "Four",
+        "Bouilloire",
+        "Machine d'eau pétillante"
+      ],
+      "correctIndex": 0,
+      "uploaderName": "Clément"
+    },
+    {
+      "text": "Quels étaient les autres prétendants d'Alix ?",
+      "options": [
+        "Brice de Nice, Brice de Marseille, Brice de Lyon",
+        "Jean Jacques Goldman et Johnny Halliday",
+        "Tom Cruise/ Brad Pit/ George Clooney",
+        "Barack Obama ou  Jacques Chirac"
+      ],
+      "correctIndex": 2,
+      "uploaderName": "Clément"
+    },
+    {
+      "text": "Alix arborait une magnifique tenue de couleur vert amande  pour les mariages de l’année 2024. Est-ce …",
+      "options": [
+        "Un tailleur pantalon",
+        "Une robe",
+        "Une combinaison , en sur son temps !"
+      ],
+      "correctIndex": 0,
+      "uploaderName": "Christophe Frerebeau"
+    },
+    {
+      "text": "Nathalie et ( prénom du papa de Brice) ont composé une astucieux et poétique poème le soir du dîner de mariage de Brice et Alix . À la mode de …/",
+      "options": [
+        "Baudelaire",
+        "La Fontaine"
+      ],
+      "correctIndex": 0,
+      "uploaderName": "Christophe Frerebeau"
+    },
+    {
+      "text": "Quelle fut la dernière adresse de Brice et Alix à Paris ?",
+      "options": [
+        "42 rue de Lévis",
+        "11 rue Bélidor",
+        "16 rue Vandrezanne",
+        "18 rue Waldeck-Rousseau"
+      ],
+      "correctIndex": 1,
+      "uploaderName": "Christophe Frerebeau"
+    },
+    {
+      "text": "Combien de fois faut il rincer la salade ?",
+      "options": [
+        "1",
+        "2",
+        "3"
+      ],
+      "correctIndex": 0,
+      "uploaderName": "Clemence"
+    },
+    {
+      "text": "Quelle était la première addresse de nos tourtereaux après leur mariage ?",
+      "options": [
+        "Jj",
+        "Je ne sais plus"
+      ],
+      "correctIndex": 0,
+      "uploaderName": "Clemence"
+    },
+    {
+      "text": "Quelle est la spécialité culinaire de Brice à base de knacki?",
+      "options": [
+        "Les calamars",
+        "Les pieuvres",
+        "Les anguilles"
+      ],
+      "correctIndex": 0,
+      "uploaderName": "Clemence"
     }
   ]
 }

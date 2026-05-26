@@ -7,7 +7,7 @@ import { BACard } from '@/components/design/card'
 import { BAFooter } from '@/components/design/footer'
 import { PageContainer } from '@/components/design/page-container'
 import { IconArrow } from '@/components/design/icons'
-import { formatEUR, daysUntil } from '@/lib/format'
+import { formatEUR, daysUntil, daysSinceWedding } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,16 +16,17 @@ export default async function HomePage() {
   const firstName = getFirstName(guest)
 
   const weddingISO = process.env.NEXT_PUBLIC_WEDDING_DATE ?? '2026-05-23'
-  const dLeft = daysUntil(weddingISO)
+  const dSince = daysSinceWedding(weddingISO)
+  // Post-mariage : compteur j+X, sinon j-X.
+  const counterLabel = dSince > 0 ? `j+${dSince}` : `j-${daysUntil(weddingISO)}`
+  const isPostWedding = dSince > 0
 
   const service = getServiceClient()
-  const [total, photosCountRes, quizzCountRes] = await Promise.all([
+  const [total, photosCountRes] = await Promise.all([
     getCagnotteTotalCents(),
     service.from('photos').select('*', { count: 'exact', head: true }),
-    service.from('quizz').select('*', { count: 'exact', head: true }),
   ])
   const photoCount = photosCountRes.count ?? 0
-  const quizzCount = quizzCountRes.count ?? 0
   const whatsappUrl = process.env.NEXT_PUBLIC_WHATSAPP_URL ?? ''
 
   return (
@@ -37,7 +38,7 @@ export default async function HomePage() {
           🤫 entre nous
         </div>
         <div className="font-mono text-[11px] text-ink-mute tracking-[0.12em] uppercase">
-          j-{dLeft}
+          {counterLabel}
         </div>
       </div>
 
@@ -53,9 +54,20 @@ export default async function HomePage() {
           className="mt-[14px] text-ink-soft text-[17px] leading-[1.5] lg:text-[19px] lg:max-w-[520px]"
           style={{ textWrap: 'pretty' }}
         >
-          On prépare quelque chose pour <span className="ba-pen">Brice &amp; Alix</span>. Un cadeau
-          collectif, en douce. Envoie des photos sympa, glisse des questions drôles pour le quiz,
-          et bien sûr mets un peu dans la cagnotte si cela te tente.
+          {isPostWedding ? (
+            <>
+              Le grand jour est passé. Si tu n&apos;as pas encore mis au pot pour{' '}
+              <span className="ba-pen">Brice &amp; Alix</span>, c&apos;est toujours possible — et tu
+              peux maintenant partager tes photos de la fête.
+            </>
+          ) : (
+            <>
+              On prépare quelque chose pour{' '}
+              <span className="ba-pen">Brice &amp; Alix</span>. Un cadeau collectif, en douce.
+              Envoie des photos sympa, glisse des questions drôles pour le quiz, et bien sûr mets
+              un peu dans la cagnotte si cela te tente.
+            </>
+          )}
         </p>
       </div>
 
@@ -110,7 +122,9 @@ export default async function HomePage() {
             className="text-[14px] leading-[1.45]"
             style={{ color: 'rgba(244,237,224,.75)', maxWidth: 280 }}
           >
-            Tu souhaites participer à un cadeau, c&apos;est par là.
+            {isPostWedding
+              ? "Encore le temps de contribuer si tu n'as pas encore mis."
+              : "Tu souhaites participer à un cadeau, c'est par là."}
           </div>
           <div className="flex items-center justify-between mt-[18px]">
             <div>
@@ -135,21 +149,30 @@ export default async function HomePage() {
 
       {/* Cards secondaires */}
       <div className="px-[22px] pt-[14px] pb-[8px] flex flex-col gap-[12px]">
+        {isPostWedding && (
+          <SecondaryCard
+            href="/photos?tab=event"
+            iconSrc="/old-photo.png"
+            iconAlt="Photos de la fête"
+            title="Tes photos de la fête."
+            body="Cérémonie, vin d'honneur, soirée. Glisse tout, on partage."
+          />
+        )}
         <SecondaryCard
-          href="/photos"
+          href={isPostWedding ? '/photos?tab=souvenirs' : '/photos'}
           iconSrc="/old-photo.png"
           iconAlt="Vieilles photos"
-          title="Tes vieilles photos d'eux."
-          body="Voyages, soirées, mariages d'amis. Promis on garde tout pour nous."
-          meta={photoCount > 0 ? `${photoCount} ${photoCount > 1 ? 'photos partagées' : 'photo partagée'}` : null}
-        />
-        <SecondaryCard
-          href="/quizz"
-          iconSrc="/quizz.png"
-          iconAlt="Quizz"
-          title="Une question pour le quizz."
-          body="Une histoire d'eux, transformée en question piège pour le jour J."
-          meta={quizzCount > 0 ? `${quizzCount} ${quizzCount > 1 ? 'questions proposées' : 'question proposée'}` : null}
+          title={isPostWedding ? 'Les vieilles photos.' : "Tes vieilles photos d'eux."}
+          body={
+            isPostWedding
+              ? 'Tu peux encore en ajouter, et voir celles des autres.'
+              : "Voyages, soirées, mariages d'amis. Promis on garde tout pour nous."
+          }
+          meta={
+            photoCount > 0
+              ? `${photoCount} ${photoCount > 1 ? 'photos partagées' : 'photo partagée'}`
+              : null
+          }
         />
         {whatsappUrl && (
           <SecondaryCard

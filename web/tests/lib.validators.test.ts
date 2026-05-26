@@ -86,12 +86,23 @@ describe('cagnotteMessageSchema', () => {
 })
 
 describe('photoSignSchema', () => {
-  it('accepte un image/jpeg < 50 MB', () => {
+  it('accepte un image/heic < 200 MB sur le bucket souvenirs', () => {
     expect(
       photoSignSchema.safeParse({
         filename: 'IMG_0001.HEIC',
         content_type: 'image/heic',
         size_bytes: 4_000_000,
+        bucket: 'souvenirs',
+      }).success,
+    ).toBe(true)
+  })
+  it('accepte un video/mp4 sur le bucket event', () => {
+    expect(
+      photoSignSchema.safeParse({
+        filename: 'fete.mp4',
+        content_type: 'video/mp4',
+        size_bytes: 80 * 1024 * 1024,
+        bucket: 'event',
       }).success,
     ).toBe(true)
   })
@@ -101,15 +112,36 @@ describe('photoSignSchema', () => {
         filename: 'doc.pdf',
         content_type: 'application/pdf',
         size_bytes: 100_000,
+        bucket: 'souvenirs',
       }).success,
     ).toBe(false)
   })
-  it('rejette > 50 MB', () => {
+  it('rejette > 200 MB (le cap par-bucket est appliqué dans la route)', () => {
     expect(
       photoSignSchema.safeParse({
-        filename: 'big.mp4',
+        filename: 'huge.mp4',
         content_type: 'video/mp4',
-        size_bytes: 60 * 1024 * 1024,
+        size_bytes: 300 * 1024 * 1024,
+        bucket: 'event',
+      }).success,
+    ).toBe(false)
+  })
+  it('requires bucket', () => {
+    expect(
+      photoSignSchema.safeParse({
+        filename: 'IMG_0001.jpg',
+        content_type: 'image/jpeg',
+        size_bytes: 1_000_000,
+      }).success,
+    ).toBe(false)
+  })
+  it("rejette un bucket inconnu", () => {
+    expect(
+      photoSignSchema.safeParse({
+        filename: 'IMG_0001.jpg',
+        content_type: 'image/jpeg',
+        size_bytes: 1_000_000,
+        bucket: 'random',
       }).success,
     ).toBe(false)
   })

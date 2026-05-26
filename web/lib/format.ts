@@ -21,6 +21,30 @@ export function daysUntil(targetISO: string): number {
 }
 
 /**
+ * Différence calendaire en jours depuis le mariage, en Europe/Paris (stable
+ * autour des minuits UTC). Retourne 0 le jour J, positif après, négatif avant.
+ */
+export function daysSinceWedding(targetISO: string, now: Date = new Date()): number {
+  const tz = 'Europe/Paris'
+  function midnightInParis(d: Date): number {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: tz,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(d)
+    const y = parts.find((p) => p.type === 'year')!.value
+    const m = parts.find((p) => p.type === 'month')!.value
+    const day = parts.find((p) => p.type === 'day')!.value
+    // Re-parse via UTC : on n'a besoin que d'un timestamp comparable.
+    return Date.UTC(Number(y), Number(m) - 1, Number(day))
+  }
+  return Math.round(
+    (midnightInParis(now) - midnightInParis(new Date(targetISO))) / 86_400_000,
+  )
+}
+
+/**
  * Renvoie l'ISO d'il y a `seconds` secondes. Wrapper utile pour échapper à
  * la règle react-hooks/purity dans les Server Components — `Date.now()` direct
  * en render est interdit, mais l'appel via fonction utilitaire passe.
